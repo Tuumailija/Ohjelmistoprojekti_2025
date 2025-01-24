@@ -1,31 +1,52 @@
+# Markus Koski
+# Miika Musta
+# Frans-Emil Vuori
+# TITE23
+
+
+
 import pygame
 import sys
 
-# Initialize Pygame
+
+
+# pygame setup
 pygame.init()
-
-# Set up the window
-window_width = 800
-window_height = 600
-window = pygame.display.set_mode((window_width, window_height))
-pygame.display.set_caption("2D Roguelike in Pygame")
-
-# Game loop
+screen = pygame.display.set_mode((1280, 720))
+clock = pygame.time.Clock()
 running = True
+dt = 0
+
+player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+
 while running:
+    # poll for events
+    # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # Clear the window with a black background
-    window.fill((0, 0, 0))  # RGB (0, 0, 0) is black
+    # fill the screen with a color to wipe away anything from last frame
+    screen.fill("purple")
 
-    # Example of rendering a simple shape (a white rectangle)
-    pygame.draw.rect(window, (255, 255, 255), pygame.Rect(100, 100, 50, 50))
+    pygame.draw.circle(screen, "red", player_pos, 40)
 
-    # Update the display
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w]:
+        player_pos.y -= 300 * dt
+    if keys[pygame.K_s]:
+        player_pos.y += 300 * dt
+    if keys[pygame.K_a]:
+        player_pos.x -= 300 * dt
+    if keys[pygame.K_d]:
+        player_pos.x += 300 * dt
+
+    # flip() the display to put your work on screen
     pygame.display.flip()
 
-# Clean up and close the game
+    # limits FPS to 60
+    # dt is delta time in seconds since last frame, used for framerate-
+    # independent physics.
+    dt = clock.tick(60) / 1000
+
 pygame.quit()
-sys.exit()
