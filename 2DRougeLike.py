@@ -4,6 +4,8 @@
 # Tuukka Penttinen
 # TITE23
 
+# https://app.clickup.com/9012306078/v/s/90123033370 <-- ClickUp-tiimilinkki projektiin
+
 import pygame
 import sys
 
