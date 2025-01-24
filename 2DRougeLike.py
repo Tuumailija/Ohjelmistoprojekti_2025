@@ -1,6 +1,7 @@
 # Markus Koski
 # Miika Musta
 # Frans-Emil Vuori
+# Tuukka Penttinen
 # TITE23
 
 import pygame
