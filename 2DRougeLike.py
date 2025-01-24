@@ -13,6 +13,10 @@ kello = pygame.time.Clock()
 kaynnissa = True
 dt = 0
 
+# Lataa taustakuva
+tausta = pygame.image.load("Metsa.png")
+
+# Pelaajan sijainti (keskellä näyttöä)
 pelaaja_sijainti = pygame.Vector2(naytto.get_width() / 2, naytto.get_height() / 2)
 
 while kaynnissa:
@@ -22,13 +26,13 @@ while kaynnissa:
         if tapahtuma.type == pygame.QUIT:
             kaynnissa = False
 
-    # täytä näyttö väreillä, jotta edellinen kuva poistuu
-    naytto.fill("purple")
+    # Piirrä taustakuva näyttöön
+    naytto.blit(tausta, (0, 0))
 
-    # piirrä ympyrä pelaajan sijaintiin
+    # Piirrä ympyrä pelaajan sijaintiin
     pygame.draw.circle(naytto, "red", pelaaja_sijainti, 40)
 
-    # tarkistetaan, onko näppäimiä painettu
+    # Tarkistetaan, onko näppäimiä painettu
     napit = pygame.key.get_pressed()
     if napit[pygame.K_w]:
         pelaaja_sijainti.y -= 300 * dt
@@ -39,12 +43,11 @@ while kaynnissa:
     if napit[pygame.K_d]:
         pelaaja_sijainti.x += 300 * dt
 
-    # flip() näyttää päivitykset näytöllä
+    # Päivitä näyttö
     pygame.display.flip()
 
-    # rajoittaa FPS:n 60:een
-    # dt on aikaväli edellisen ruudun ja nykyisen ruudun välillä sekunteina,
-    # jota käytetään ruudunpäivityksestä riippumattomassa fysiikassa.
+    # Rajoita FPS:ää 60:een
+    # dt on aikaväli edellisen ja nykyisen ruudun välillä sekunteina, jota käytetään fysiikassa.
     dt = kello.tick(60) / 1000
 
 pygame.quit()
