@@ -17,7 +17,7 @@ kaynnissa = True
 dt = 0
 
 # Lataa taustakuva
-tausta = pygame.image.load("Metsa.png")
+tausta1 = pygame.image.load("Metsa.png")
 
 # Pelaajan sijainti (keskellä näyttöä)
 pelaaja_sijainti = pygame.Vector2(naytto.get_width() / 2, naytto.get_height() / 2)
@@ -30,7 +30,7 @@ while kaynnissa:
             kaynnissa = False
 
     # Piirrä taustakuva näyttöön
-    naytto.blit(tausta, (0, 0))
+    naytto.blit(tausta1, (0, 0))
 
     # Piirrä ympyrä pelaajan sijaintiin
     pygame.draw.circle(naytto, "red", pelaaja_sijainti, 40)
