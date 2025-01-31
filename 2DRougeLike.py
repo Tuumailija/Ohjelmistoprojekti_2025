@@ -8,6 +8,7 @@
 
 import pygame
 import sys
+import os
 
 # pygame asetukset
 pygame.init()
@@ -17,7 +18,13 @@ kaynnissa = True
 dt = 0
 
 # Lataa taustakuva
-tausta1 = pygame.image.load("Metsa.png")
+nykyinen_kansio = os.path.dirname(__file__)
+
+# Muodosta absoluuttinen polku kuvaan
+kuvapolku = os.path.join(nykyinen_kansio, "Metsa.png")
+
+# Lataa taustakuva
+tausta1 = pygame.image.load(kuvapolku)
 
 # Pelaajan sijainti (keskellä näyttöä)
 pelaaja_sijainti = pygame.Vector2(naytto.get_width() / 2, naytto.get_height() / 2)
