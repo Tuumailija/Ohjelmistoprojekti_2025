@@ -4,8 +4,6 @@
 # Tuukka Penttinen
 # TITE23
 
-# https://app.clickup.com/9012306078/v/s/90123033370 <-- ClickUp-tiimilinkki projektiin
-
 import pygame
 import sys
 import os
@@ -19,7 +17,7 @@ dt = 0
 
 # Lataa taustakuva
 nykyinen_kansio = os.path.dirname(__file__)
-kuvapolku = os.path.join(nykyinen_kansio, "Metsa.png")
+kuvapolku = os.path.join(nykyinen_kansio, "1920x1080_graybackground.jpg")
 tausta1 = pygame.image.load(kuvapolku)
 
 # Pelaajan sijainti (keskellä näyttöä)
@@ -27,9 +25,13 @@ pelaaja_sijainti = pygame.Vector2(naytto.get_width() / 2, naytto.get_height() / 
 pelaaja_sade = 20  # Ympyrän säde
 
 # Seinälistan luonti (Rect-muodossa)
-seinät = [
-    pygame.Rect(200, 200, 200, 50),  # Esimerkkiseinä
-    pygame.Rect(500, 400, 300, 50),  # Toinen seinä
+seinät = [ # Rect(x, y, width, height)
+    pygame.Rect(390, 180, 375, 10),  # 1. Yläseinä
+    pygame.Rect(840, 180, 40, 10),  # 2. Yläseinä
+    pygame.Rect(390, 525, 495, 10),  # Alaseinä
+    pygame.Rect(390, 180, 10, 240),  # 1. Vasen sivuseinä
+    pygame.Rect(390, 490, 10, 40),  # 2. Vasen sivuseinä
+    pygame.Rect(875, 180, 10, 350),  # Oikea sivuseinä
 ]
 
 def tarkista_tormays(x, y):
@@ -51,7 +53,7 @@ while kaynnissa:
 
     # Piirrä seinät
     for seinä in seinät:
-        pygame.draw.rect(naytto, "blue", seinä)
+        pygame.draw.rect(naytto, "black", seinä)
 
     # Piirrä pelaaja
     pygame.draw.circle(naytto, "red", pelaaja_sijainti, pelaaja_sade)
@@ -61,13 +63,13 @@ while kaynnissa:
     uusi_x, uusi_y = pelaaja_sijainti.x, pelaaja_sijainti.y
 
     if napit[pygame.K_w]:
-        uusi_y -= 300 * dt
+        uusi_y -= 200 * dt
     if napit[pygame.K_s]:
-        uusi_y += 300 * dt
+        uusi_y += 200 * dt
     if napit[pygame.K_a]:
-        uusi_x -= 300 * dt
+        uusi_x -= 200 * dt
     if napit[pygame.K_d]:
-        uusi_x += 300 * dt
+        uusi_x += 200 * dt
 
     # Tarkista törmäys ennen päivittämistä
     if not tarkista_tormays(uusi_x, uusi_y):
