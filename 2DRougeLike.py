@@ -7,6 +7,7 @@
 import pygame
 import sys
 import os
+from Aloitusvalikko import Aloitusvalikko
 
 # pygame asetukset
 pygame.init()
@@ -42,42 +43,58 @@ def tarkista_tormays(x, y):
             return True  # Törmäys tapahtuu
     return False  # Ei törmäystä
 
+# Aloitusvalikko
+valikko = Aloitusvalikko(naytto)
+valikossa = True
+
 while kaynnissa:
-    # tapahtumien tarkistaminen
-    for tapahtuma in pygame.event.get():
-        if tapahtuma.type == pygame.QUIT:
-            kaynnissa = False
+    if valikossa:
+        # Käsittele aloitusvalikko
+        for tapahtuma in pygame.event.get():
+            if tapahtuma.type == pygame.QUIT:
+                kaynnissa = False
+            valikossa = valikko.paivita_valikko(tapahtuma)
 
-    # Piirrä taustakuva
-    naytto.blit(tausta1, (0, 0))
+        # Piirrä valikko
+        valikko.piirra_valikko()
+        pygame.display.flip()
+        kello.tick(60)
+    else:
+        # tapahtumien tarkistaminen
+        for tapahtuma in pygame.event.get():
+            if tapahtuma.type == pygame.QUIT:
+                kaynnissa = False
 
-    # Piirrä seinät
-    for seinä in seinät:
-        pygame.draw.rect(naytto, "black", seinä)
+        # Piirrä taustakuva
+        naytto.blit(tausta1, (0, 0))
 
-    # Piirrä pelaaja
-    pygame.draw.circle(naytto, "red", pelaaja_sijainti, pelaaja_sade)
+        # Piirrä seinät
+        for seinä in seinät:
+            pygame.draw.rect(naytto, "black", seinä)
 
-    # Pelaajan liikkuminen
-    napit = pygame.key.get_pressed()
-    uusi_x, uusi_y = pelaaja_sijainti.x, pelaaja_sijainti.y
+        # Piirrä pelaaja
+        pygame.draw.circle(naytto, "red", pelaaja_sijainti, pelaaja_sade)
 
-    if napit[pygame.K_w]:
-        uusi_y -= 200 * dt
-    if napit[pygame.K_s]:
-        uusi_y += 200 * dt
-    if napit[pygame.K_a]:
-        uusi_x -= 200 * dt
-    if napit[pygame.K_d]:
-        uusi_x += 200 * dt
+        # Pelaajan liikkuminen
+        napit = pygame.key.get_pressed()
+        uusi_x, uusi_y = pelaaja_sijainti.x, pelaaja_sijainti.y
 
-    # Tarkista törmäys ennen päivittämistä
-    if not tarkista_tormays(uusi_x, uusi_y):
-        pelaaja_sijainti.x = uusi_x
-        pelaaja_sijainti.y = uusi_y
+        if napit[pygame.K_w]:
+            uusi_y -= 200 * dt
+        if napit[pygame.K_s]:
+            uusi_y += 200 * dt
+        if napit[pygame.K_a]:
+            uusi_x -= 200 * dt
+        if napit[pygame.K_d]:
+            uusi_x += 200 * dt
 
-    # Päivitä näyttö
-    pygame.display.flip()
-    dt = kello.tick(60) / 1000
+        # Tarkista törmäys ennen päivittämistä
+        if not tarkista_tormays(uusi_x, uusi_y):
+            pelaaja_sijainti.x = uusi_x
+            pelaaja_sijainti.y = uusi_y
+
+        # Päivitä näyttö
+        pygame.display.flip()
+        dt = kello.tick(60) / 1000
 
 pygame.quit()
