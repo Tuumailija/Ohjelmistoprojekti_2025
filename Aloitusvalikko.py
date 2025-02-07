@@ -24,7 +24,9 @@ class Aloitusvalikko:
         ohjeet_teksti = [
             "Ohjeet:",
             "Käytä WASD-näppäimiä liikkuaksesi ympäri karttaa.",
-            "Tuhoa vihollisia",        ]
+            "Tuhoa vihollisia",
+            "Poistu ohjeista painamalla ESC"
+            ]
 
         for i, rivi in enumerate(ohjeet_teksti):
             teksti = self.pieni_fontti.render(rivi, True, (255, 255, 255))
