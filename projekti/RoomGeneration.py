@@ -12,7 +12,7 @@ dt = 0
 
 # Lataa taustakuva
 nykyinen_kansio = os.path.dirname(__file__)
-kuvapolku = os.path.join(nykyinen_kansio, "1920x1080_graybackground.jpg")
+kuvapolku = os.path.join(nykyinen_kansio, "..", "media", "Img", "1920x1080_graybackground.jpg")
 tausta1 = pygame.image.load(kuvapolku)
 
 # Pelaajan säde
