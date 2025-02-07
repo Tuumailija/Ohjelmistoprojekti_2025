@@ -10,6 +10,12 @@ class Aloitusvalikko:
         self.valittu_optio = 0
         self.ohjeet_nakymassa = False  # Uusi tila ohjenäkymälle
 
+        # Ladataan ja soitetaan taustamusiikki
+        pygame.mixer.init()
+        musiikin_polku = r"C:\Users\marku\Documents\Seamk\Ohjelmistoprojekti\Aloitusmusiikki.mp3"
+        pygame.mixer.music.load(musiikin_polku)
+        pygame.mixer.music.play(-1)  # Soitetaan musiikki jatkuvana silmukkana
+
     def piirra_valikko(self):
         # Piirretään valikko näytölle
         self.naytto.fill((0, 0, 0))  # Täytetään näyttö mustalla
@@ -46,6 +52,7 @@ class Aloitusvalikko:
                     self.valittu_optio = (self.valittu_optio + 1) % len(self.optio_lista)
                 elif tapahtuma.key == pygame.K_RETURN:
                     if self.valittu_optio == 0:  # Aloita peli
+                        pygame.mixer.music.stop()  # Pysäytä musiikki pelin alkaessa
                         return False  # Poistu valikosta ja aloita peli
                     elif self.valittu_optio == 1:  # Ohjeet
                         self.ohjeet_nakymassa = True  # Siirry ohjenäkymään
