@@ -5,7 +5,7 @@ import random
 
 # Pygame asetukset
 pygame.init()
-naytto = pygame.display.set_mode((1280, 720))
+naytto = pygame.display.set_mode((1920, 1080))
 kello = pygame.time.Clock()
 kaynnissa = True
 dt = 0
@@ -23,7 +23,7 @@ ovi_koko = pelaaja_sade * 4  # Oviaukko on 2x pelaajan halkaisija
 seinan_paksuus = 10
 
 # **Satunnaisten huonekokojen generointi**
-perus_koko = 300  # Pienimmän huoneen koko
+perus_koko = 400  # Pienimmän huoneen koko
 huone_suhteet = [(1, 1), (1, 2), (2, 1)]  # Suhdeparit
 suhde = random.choice(huone_suhteet)  # Valitaan yksi satunnaisesti
 
