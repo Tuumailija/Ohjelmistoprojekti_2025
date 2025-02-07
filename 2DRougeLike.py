@@ -21,6 +21,10 @@ nykyinen_kansio = os.path.dirname(__file__)
 kuvapolku = os.path.join(nykyinen_kansio, "1920x1080_graybackground.jpg")
 tausta1 = pygame.image.load(kuvapolku)
 
+# Aloitusvalikon luonti
+valikko = Aloitusvalikko(naytto)
+valikossa = True
+
 # Pelaajan sijainti (keskellä näyttöä)
 pelaaja_sijainti = pygame.Vector2(naytto.get_width() / 2, naytto.get_height() / 2)
 pelaaja_sade = 20  # Ympyrän säde
@@ -43,29 +47,24 @@ def tarkista_tormays(x, y):
             return True  # Törmäys tapahtuu
     return False  # Ei törmäystä
 
-# Aloitusvalikko
-valikko = Aloitusvalikko(naytto)
-valikossa = True
-
 while kaynnissa:
-    if valikossa:
-        # Käsittele aloitusvalikko
-        for tapahtuma in pygame.event.get():
-            if tapahtuma.type == pygame.QUIT:
-                kaynnissa = False
+    # tapahtumien tarkistaminen
+    for tapahtuma in pygame.event.get():
+        if tapahtuma.type == pygame.QUIT:
+            kaynnissa = False
+
+        # Päivitä valikon tapahtumat, jos ollaan valikkotilassa
+        if valikossa:
             valikossa = valikko.paivita_valikko(tapahtuma)
 
-        # Piirrä valikko
-        valikko.piirra_valikko()
-        pygame.display.flip()
-        kello.tick(60)
+    # Jos ollaan valikossa
+    if valikossa:
+        if valikko.ohjeet_nakymassa:
+            valikko.piirra_ohjeet()  # Piirrä ohjeet näytölle
+        else:
+            valikko.piirra_valikko()  # Piirrä aloitusvalikko näytölle
     else:
-        # tapahtumien tarkistaminen
-        for tapahtuma in pygame.event.get():
-            if tapahtuma.type == pygame.QUIT:
-                kaynnissa = False
-
-        # Piirrä taustakuva
+        # Piirrä peli (taustakuva, seinät, pelaaja)
         naytto.blit(tausta1, (0, 0))
 
         # Piirrä seinät
@@ -93,8 +92,8 @@ while kaynnissa:
             pelaaja_sijainti.x = uusi_x
             pelaaja_sijainti.y = uusi_y
 
-        # Päivitä näyttö
-        pygame.display.flip()
-        dt = kello.tick(60) / 1000
+    # Päivitä näyttö
+    pygame.display.flip()
+    dt = kello.tick(60) / 1000
 
 pygame.quit()
