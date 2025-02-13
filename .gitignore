@@ -1,0 +1,3 @@
+# älä lisää python enviroment kansiota gittiin
+.venv/
+projekti/__pycache__/
