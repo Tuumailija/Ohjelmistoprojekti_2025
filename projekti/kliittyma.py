@@ -1,18 +1,24 @@
-import random
 import pygame
+import random
 import sys
-import os
+from tile_kartta import Kartta  
+from MapGen import Map
+from player import Player
 from raycast import RayCaster
-from MapGen import MapGen
+
+# Constants
+SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1080
+CELL_WIDTH, CELL_HEIGHT, TILE_SIZE = 11, 9, 64
+MATRIX_ROWS, MATRIX_COLS = 9, 30
 
 class Kliittyma:
-    #muutos
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.ray_caster = RayCaster(self.screen, ray_length=2000)
-        self.obstacles = []
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Peli")
+        self.clock = pygame.time.Clock()
+        self.ray_caster = RayCaster(self.screen, ray_length=2000)
+        self.game_running = False
 
         # Musiikki kräshää koko jutun jos se ei löydä tiedostoa!!! (Markus)
 
@@ -36,18 +42,18 @@ class Kliittyma:
 
             for i, optio in enumerate(optio_lista):
                 teksti = iso_fontti.render(optio, True, (255, 255, 255))
-                teksti_rect = teksti.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2 - 100 + i * 100))
+                teksti_rect = teksti.get_rect(center=(self.screen.get_width() // 2, 200 + i * 100))
                 if teksti_rect.collidepoint(mouse_pos):
                     teksti = iso_fontti.render(optio, True, (255, 0, 0))
                     valittu_optio = i
                 self.screen.blit(teksti, teksti_rect)
-            
+
             pygame.display.flip()
 
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if valittu_optio == 0:
-                        self.luo_tyhja_huone()
+                        self.kaynnista_peli()
                         # pygame.mixer.quit() #Lopettaa aloitus musiikin soiton
                     elif valittu_optio == 1:
                         self.piirra_ohjeet()
@@ -63,8 +69,7 @@ class Kliittyma:
         ohjeet_teksti = [
             "Ohjeet:",
             "Käytä WASD-näppäimiä liikkuaksesi ympäri karttaa.",
-            "Tuhoa vihollisia.",
-            "Poistu ohjeista painamalla ESC."
+            "Poistu ohjeista painamalla ESC"
         ]
         pieni_fontti = pygame.font.SysFont("Arial", 40)
         for i, rivi in enumerate(ohjeet_teksti):
@@ -75,9 +80,10 @@ class Kliittyma:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     return
-
+                
+    """ KOMMENTOITU POIS VÄLIAIKAISESTI KOSKA EN TIEDÄ MITEN INTERACTAA MAPIN LUOMISKOODIN KANSSA T. MIIKA
     def generoi_esteet(self, määrä=5):
-        """Luo satunnaisia esteitä ja tallentaa ne listaan."""
+        # Luo satunnaisia esteitä ja tallentaa ne listaan.
         self.esteet = []
         for _ in range(määrä):
             x1 = random.randint(50, 750)
@@ -86,36 +92,36 @@ class Kliittyma:
             y2 = y1 + random.randint(20, 100)
             self.esteet.append((x1, y1, x2, y2))
         self.ray_caster.set_obstacles(self.esteet)  # Lähetetään esteet RayCasterille
-    
-    def draw_game(self):
-        """Luo pelin kartan ja piirtää sen."""
-        map_gen = MapGen()
-        tilemap = map_gen.tilemap
-        wall_rects = map_gen.wall_rects
-        map_width = map_gen.map_width_px
-        map_height = map_gen.map_height_px
-        
-    def luo_tyhja_huone(self):
-        """Luo huone satunnaisilla esteillä ja näyttää säteet hiiren kohdalta."""
-        self.screen.fill((50, 50, 50))
-        self.generoi_esteet()  # Luodaan uudet esteet
-        running = True
-        
-        while running:
-            self.screen.fill((50, 50, 50))
-            mouse_pos = pygame.mouse.get_pos()
-            self.ray_caster.update_rays(mouse_pos)  # Säteen lähtökohta on hiiren sijainti
-            self.ray_caster.draw(mouse_pos)
-            
-            # Piirretään esteet
-            for wall in self.esteet:
-                pygame.draw.line(self.screen, (255, 0, 0), (wall[0], wall[1]), (wall[2], wall[3]), 3)
-            
-            pygame.display.flip()
-            
+    """
+
+    def kaynnista_peli(self):
+        """Runs the main game loop inside the menu system."""
+        self.game_running = True
+        matrix = Kartta.generoi_tile_matriisi()
+        game_map = Map(matrix)
+
+        start_r, start_c = MATRIX_ROWS // 2, 0
+        start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
+        start_y = (start_r * CELL_HEIGHT + 1 + 8 // 2) * TILE_SIZE
+        player = Player(start_x, start_y)
+
+        while self.game_running:
+            self.clock.tick(60)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    running = False
+                    self.game_running = False
+                    return  # Return to menu
+
+            player.move(pygame.key.get_pressed(), game_map.wall_rects)
+            
+            cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
+            cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
+
+            self.screen.fill((0, 0, 0))
+            game_map.draw(self.screen, cam_x, cam_y)
+            player.draw(self.screen, cam_x, cam_y)
+
+            pygame.display.flip()
