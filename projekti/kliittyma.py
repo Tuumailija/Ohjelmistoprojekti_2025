@@ -3,6 +3,7 @@ import pygame
 import sys
 import os
 from raycast import RayCaster
+from MapGen import MapGen
 
 class Kliittyma:
     #muutos
@@ -85,6 +86,14 @@ class Kliittyma:
             y2 = y1 + random.randint(20, 100)
             self.esteet.append((x1, y1, x2, y2))
         self.ray_caster.set_obstacles(self.esteet)  # Lähetetään esteet RayCasterille
+    
+    def draw_game(self):
+        """Luo pelin kartan ja piirtää sen."""
+        map_gen = MapGen()
+        tilemap = map_gen.tilemap
+        wall_rects = map_gen.wall_rects
+        map_width = map_gen.map_width_px
+        map_height = map_gen.map_height_px
         
     def luo_tyhja_huone(self):
         """Luo huone satunnaisilla esteillä ja näyttää säteet hiiren kohdalta."""
