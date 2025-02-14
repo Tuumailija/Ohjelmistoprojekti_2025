@@ -47,7 +47,7 @@ class Kliittyma:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if valittu_optio == 0:
-                        self.luo_tyhja_huone()
+                        self.draw_game()
                         # pygame.mixer.quit() #Lopettaa aloitus musiikin soiton
                     elif valittu_optio == 1:
                         self.piirra_ohjeet()
