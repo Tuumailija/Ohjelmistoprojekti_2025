@@ -5,6 +5,7 @@ import os
 from raycast import RayCaster
 
 class Kliittyma:
+    #muutos
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
