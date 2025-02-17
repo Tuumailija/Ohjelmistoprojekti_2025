@@ -1,8 +1,12 @@
 import random 
 class Kartta:
+
+    pituus = 30
+    korkeus = 9
+
     def generoi_tile_matriisi():
-        pituus = 30
-        korkeus = 9
+        pituus = Kartta.pituus
+        korkeus = Kartta.korkeus
     
         matrix = [[0 for _ in range(pituus)] for _ in range(korkeus)]
     

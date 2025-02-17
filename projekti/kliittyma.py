@@ -9,7 +9,7 @@ from raycast import RayCaster
 # Constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1080
 CELL_WIDTH, CELL_HEIGHT, TILE_SIZE = 11, 9, 64
-MATRIX_ROWS, MATRIX_COLS = 9, 30
+MATRIX_ROWS, MATRIX_COLS = Kartta.pituus, Kartta.korkeus
 
 class Kliittyma:
     def __init__(self):
