@@ -91,6 +91,21 @@ class Map:
                 for y, row in enumerate(self.tilemap) 
                 for x, tile in enumerate(row) if tile == WALL]
     
+    def get_walls_in_radius(self, x, y, radius):
+        walls = []
+        tile_x = x // TILE_SIZE  # Muunnetaan pikselikoordinaatit ruutukoordinaateiksi
+        tile_y = y // TILE_SIZE
+        tile_radius = radius // TILE_SIZE  # Muunnetaan myös säde ruutukoordinaateiksi
+
+        for j in range(max(0, tile_y - tile_radius), min(len(self.tilemap), tile_y + tile_radius + 1)):
+            for i in range(max(0, tile_x - tile_radius), min(len(self.tilemap[0]), tile_x + tile_radius + 1)):
+                if (i - tile_x) ** 2 + (j - tile_y) ** 2 <= tile_radius ** 2:  # Sädetarkistus (ympyrän muoto)
+                    if self.tilemap[j][i] == WALL:
+                        rect = pygame.Rect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                        walls.append(rect)  # Lisätään Rect-olio listaan
+
+        return walls
+
     def draw(self, screen, cam_x, cam_y):
         for y in range(cam_y // TILE_SIZE, min(len(self.tilemap), (cam_y + screen.get_height()) // TILE_SIZE + 1)):
             for x in range(cam_x // TILE_SIZE, min(len(self.tilemap[0]), (cam_x + screen.get_width()) // TILE_SIZE + 1)):

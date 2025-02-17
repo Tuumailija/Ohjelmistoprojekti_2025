@@ -106,14 +106,13 @@ class Kliittyma:
         player = Player(start_x, start_y)
 
         while self.game_running:
-            self.clock.tick(60)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.game_running = False
-                    return  # Return to menu
+                    return
 
             player.move(pygame.key.get_pressed(), game_map.wall_rects)
             
@@ -123,5 +122,10 @@ class Kliittyma:
             self.screen.fill((0, 0, 0))
             game_map.draw(self.screen, cam_x, cam_y)
             player.draw(self.screen, cam_x, cam_y)
+
+            walls = game_map.get_walls_in_radius(cam_x, cam_y, 500)
+            #for wall in walls:
+            #    if wall.rect.colliderect(player.rect):
+            #        walls.remove(wall)
 
             pygame.display.flip()
