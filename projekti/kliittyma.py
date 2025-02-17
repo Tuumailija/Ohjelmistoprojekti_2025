@@ -123,6 +123,9 @@ class Kliittyma:
             game_map.draw(self.screen, cam_x, cam_y)
             player.draw(self.screen, cam_x, cam_y)
 
-            #game_map.get_walls_in_radius(cam_x, cam_y, 500)
+            walls = game_map.get_walls_in_radius(cam_x, cam_y, 500)
+            for wall in walls:
+                if wall.rect.colliderect(player.rect):
+                    walls.remove(wall)
 
             pygame.display.flip()
