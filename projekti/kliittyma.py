@@ -17,7 +17,7 @@ class Kliittyma:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Peli")
         self.clock = pygame.time.Clock()
-        self.ray_caster = RayCaster(self.screen, ray_length=2000)
+        self.ray_caster = RayCaster(self.screen, ray_length=1000)
         self.game_running = False
 
         # Musiikki kräshää koko jutun jos se ei löydä tiedostoa!!! (Markus)
@@ -123,9 +123,24 @@ class Kliittyma:
             game_map.draw(self.screen, cam_x, cam_y)
             player.draw(self.screen, cam_x, cam_y)
 
-            walls = game_map.get_walls_in_radius(cam_x, cam_y, 500)
+            #walls = game_map.get_walls_in_radius(cam_x, cam_y, 250)
+            #self.ray_caster.set_obstacles(walls)
             #for wall in walls:
-            #    if wall.rect.colliderect(player.rect):
-            #        walls.remove(wall)
+            #    pygame.draw.circle(self.screen, (255, 0, 0), (wall.x - cam_x, wall.y - cam_y, wall.width, wall.height), 5)
+            #self.ray_caster.update_rays(player.rect.center)
+            #self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
+            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 500)
+            self.ray_caster.set_obstacles(walls)
+            
+            # Piirretään seinät ja lisätään kameran offset
+            for wall in walls:
+                pygame.draw.rect(self.screen, (255, 0, 0), 
+                                 pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
+            
+            # Päivitetään raycasterin säteet ja piirretään ne
+            self.ray_caster.update_rays(player.rect.center)
+            self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
+
+            
             pygame.display.flip()

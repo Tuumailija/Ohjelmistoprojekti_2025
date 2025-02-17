@@ -13,9 +13,10 @@ class RayCaster:
         """Asettaa esteet, joihin säteet voivat osua (odottaa pygame.Rect-listaa)."""
         self.obstacles = obstacles
 
-    def update_rays(self, pos, num_rays=360):
+    def update_rays(self, pos, num_rays=90):
         """Luo säteet pelaajan sijainnista."""
-        self.rays = [Ray(pos, math.radians(a), self.ray_length) for a in range(0, num_rays, 1)]
+        #tän voi helposti optimoida niin, että kulmat lasketaan vain kerran
+        self.rays = [Ray(pos, math.radians(a), self.ray_length) for a in range(0, 360, 360 // num_rays)]
 
     def cast_rays(self):
         """Laskee säteiden loppupisteet ottaen huomioon suorakulmioesteet."""

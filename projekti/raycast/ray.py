@@ -5,21 +5,18 @@ class Ray:
     def __init__(self, pos, angle, ray_length):
         self.pos = pygame.Vector2(pos)
         self.dir = pygame.Vector2(math.cos(angle), math.sin(angle))
-        self.ray_length = ray_length  # Säteen maksimipituus
+        self.ray_length = ray_length  # Maksimipituus säteelle
 
     def cast(self, obstacles):
         closest = None
         min_dist = self.ray_length
-        end_point = self.pos + self.dir * self.ray_length
-        
         ray_start = self.pos
         ray_end = ray_start + self.dir * self.ray_length
-        
+
         for rect in obstacles:
             if not isinstance(rect, pygame.Rect):
                 continue
-            
-            # Lasketaan törmäyspiste suorakulmion kanssa
+
             hit_point = self.raycast_rect(ray_start, ray_end, rect)
             if hit_point:
                 dist = ray_start.distance_to(hit_point)
@@ -27,7 +24,7 @@ class Ray:
                     min_dist = dist
                     closest = hit_point
 
-        return closest if closest else end_point
+        return closest if closest else ray_end
 
     def raycast_rect(self, start, end, rect):
         """Laskee törmäyksen säteen ja suorakulmion välillä"""
@@ -67,5 +64,5 @@ class Ray:
 
         if 0 <= t <= 1 and 0 <= u:
             return pygame.Vector2(x1 + t * (x2 - x1), y1 + t * (y2 - y1))
-        
+
         return None  # Ei törmäystä
