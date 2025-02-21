@@ -124,17 +124,11 @@ class Kliittyma:
                     return
 
             player.move(pygame.key.get_pressed(), game_map.wall_rects)
-            
-            
-            cam_x = player.rect.centerx - SCREEN_WIDTH // 2
-            cam_y = player.rect.centery - SCREEN_HEIGHT // 2
-
-            #cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
-            #cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
 
 
-            print(player.rect.centerx, player.rect.centery)
-            print(cam_x, cam_y)
+            cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
+            cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
+
 
             self.screen.fill((0, 0, 0))
             game_map.draw(self.screen, cam_x, cam_y)
