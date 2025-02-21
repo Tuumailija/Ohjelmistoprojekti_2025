@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+import os
 from tile_kartta import Kartta  
 from MapGen import Map
 from player import Player
@@ -20,13 +21,21 @@ class Kliittyma:
         self.ray_caster = RayCaster(self.screen, ray_length=1000)
         self.game_running = False
 
-        # Musiikki kräshää koko jutun jos se ei löydä tiedostoa!!! (Markus)
+        self.valikko_musiikki
 
-        #pygame.mixer.init()
-        #musiikki_polku = os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "media", "Aloitusmusiikki.mp3")
-        #pygame.mixer_music.load(musiikki_polku)
-        #pygame.mixer_music.play(-1)
-        #pygame.mixer_music.set_volume(0.5)
+    def valikko_musiikki(self):
+        musiikki_polku = os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "media", "Aloitusmusiikki.mp3")
+        if os.path.exists(musiikki_polku): # Tarkistaa onko musiikki tiedosto olemassa, niin ei kräshää 
+            pygame.mixer.init()
+            pygame.mixer.music.load(musiikki_polku)
+            pygame.mixer.music.play(-1)
+        else :
+            print("Aloitusmusiikkia ei löytynyt")
+
+    def lopeta_valikko_musiikki(self):
+        if self.musiikki_soi:
+            pygame.mixer.music.stop()
+            self.musiikki_soi = False
 
     def run(self):
         self.screen.fill((0, 0, 0))
