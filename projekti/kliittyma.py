@@ -99,7 +99,7 @@ class Kliittyma:
         self.game_running = True
         matrix = Kartta.generoi_tile_matriisi()
         game_map = Map(matrix)
-
+    
         start_r, start_c = MATRIX_ROWS // 2, 0
         start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
         start_y = (start_r * CELL_HEIGHT + 1 + 8 // 2) * TILE_SIZE
@@ -116,8 +116,16 @@ class Kliittyma:
 
             player.move(pygame.key.get_pressed(), game_map.wall_rects)
             
-            cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
-            cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
+            
+            cam_x = player.rect.centerx - SCREEN_WIDTH // 2
+            cam_y = player.rect.centery - SCREEN_HEIGHT // 2
+
+            #cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
+            #cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
+
+
+            print(player.rect.centerx, player.rect.centery)
+            print(cam_x, cam_y)
 
             self.screen.fill((0, 0, 0))
             game_map.draw(self.screen, cam_x, cam_y)
@@ -130,17 +138,17 @@ class Kliittyma:
             #self.ray_caster.update_rays(player.rect.center)
             #self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
-            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 500)
-            self.ray_caster.set_obstacles(walls)
-            
-            # Piirretään seinät ja lisätään kameran offset
-            for wall in walls:
-                pygame.draw.rect(self.screen, (255, 0, 0), 
-                                 pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
-            
-            # Päivitetään raycasterin säteet ja piirretään ne
-            self.ray_caster.update_rays(player.rect.center)
-            self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
+            #walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 500)
+            #self.ray_caster.set_obstacles(walls)
+            #
+            ## Piirretään seinät ja lisätään kameran offset
+            #for wall in walls:
+            #    pygame.draw.rect(self.screen, (255, 0, 0), 
+            #                     pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
+            #
+            ## Päivitetään raycasterin säteet ja piirretään ne
+            #self.ray_caster.update_rays(player.rect.center)
+            #self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
             
             pygame.display.flip()
