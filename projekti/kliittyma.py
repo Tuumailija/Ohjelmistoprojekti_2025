@@ -153,7 +153,6 @@ class Kliittyma:
 
             self.screen.fill((0, 0, 0))
             game_map.draw(self.screen, cam_x, cam_y)
-            player.draw(self.screen, cam_x, cam_y)
 
 
             walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 1000)
@@ -169,5 +168,6 @@ class Kliittyma:
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y))
             self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
+            player.draw(self.screen, cam_x, cam_y)
             
             pygame.display.flip()
