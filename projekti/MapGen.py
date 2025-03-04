@@ -34,7 +34,6 @@ class Map:
         
         self.create_doors(tilemap, rows, cols)
         self.merge_rooms(tilemap, rows, cols)
-
         return tilemap
 
     def create_doors(self, tilemap, rows, cols):
@@ -76,7 +75,7 @@ class Map:
                 if self.matrix[r][c] != 0 and self.matrix[r][c + 1] == self.matrix[r][c]:
                     wall_x = (c + 1) * CELL_WIDTH
                     for y in range(r * CELL_HEIGHT + 1, r * CELL_HEIGHT + 1 + ROOM_HEIGHT):
-                        tilemap[y][wall_x] = FLOOR  # Remove vertical wall
+                        tilemap[y][wall_x] = FLOOR
 
         # Remove walls between vertically merged rooms (2x1, 3x1, etc.)
         for r in range(rows - 1):
@@ -84,32 +83,42 @@ class Map:
                 if self.matrix[r][c] != 0 and self.matrix[r + 1][c] == self.matrix[r][c]:
                     wall_y = (r + 1) * CELL_HEIGHT
                     for x in range(c * CELL_WIDTH + 1, c * CELL_WIDTH + 1 + ROOM_WIDTH):
-                        tilemap[wall_y][x] = FLOOR  # Remove horizontal wall
+                        tilemap[wall_y][x] = FLOOR
 
     def get_wall_rects(self):
-        return [pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE) 
-                for y, row in enumerate(self.tilemap) 
-                for x, tile in enumerate(row) if tile == WALL]
-    
-    def get_walls_in_radius(self, x, y, radius):
-        walls = []
-        tile_x = x // TILE_SIZE  # Muunnetaan pikselikoordinaatit ruutukoordinaateiksi
-        tile_y = y // TILE_SIZE
-        tile_radius = radius // TILE_SIZE  # Muunnetaan myös säde ruutukoordinaateiksi
-    
-        for j in range(max(0, tile_y - tile_radius), min(len(self.tilemap), tile_y + tile_radius + 1)):
-            for i in range(max(0, tile_x - tile_radius), min(len(self.tilemap[0]), tile_x + tile_radius + 1)):
-                if (i - tile_x) ** 2 + (j - tile_y) ** 2 <= tile_radius ** 2:  # Sädetarkistus (ympyrän muoto)
-                    if self.tilemap[j][i] == WALL:
-                        rect = pygame.Rect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-                        walls.append(rect)  # Lisätään Rect-olio listaan
-    
-        return walls
+        visited = set()
+        wall_rects = []
+
+        for y in range(len(self.tilemap)):
+            for x in range(len(self.tilemap[y])):
+                if self.tilemap[y][x] == WALL and (x, y) not in visited:
+                    width, height = 1, 1
+                    
+                    while x + width < len(self.tilemap[y]) and self.tilemap[y][x + width] == WALL:
+                        visited.add((x + width, y))
+                        width += 1
+                    
+                    while y + height < len(self.tilemap) and all(self.tilemap[y + height][x + i] == WALL for i in range(width)):
+                        for i in range(width):
+                            visited.add((x + i, y + height))
+                        height += 1
+                    
+                    wall_rects.append(pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, width * TILE_SIZE, height * TILE_SIZE))
+                    visited.update((x + i, y + j) for i in range(width) for j in range(height))
+        
+        return wall_rects
 
     def draw(self, screen, cam_x, cam_y):
-        for y in range(cam_y // TILE_SIZE, min(len(self.tilemap), (cam_y + screen.get_height()) // TILE_SIZE + 1)):
-            for x in range(cam_x // TILE_SIZE, min(len(self.tilemap[0]), (cam_x + screen.get_width()) // TILE_SIZE + 1)):
-                tile = self.tilemap[y][x]
-                rect = pygame.Rect(x * TILE_SIZE - cam_x, y * TILE_SIZE - cam_y, TILE_SIZE, TILE_SIZE)
-                color = {FLOOR: COLOR_FLOOR, WALL: COLOR_WALL, DOOR: COLOR_DOOR}.get(tile, (255, 0, 255))
-                pygame.draw.rect(screen, color, rect)
+        for wall in self.wall_rects:
+            pygame.draw.rect(screen, COLOR_WALL, pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
+
+    def get_walls_in_radius(self, x, y, radius):
+        walls = []
+        center = pygame.Vector2(x, y)
+    
+        for wall in self.wall_rects:
+            wall_center = pygame.Vector2(wall.centerx, wall.centery)
+            if center.distance_to(wall_center) <= radius:
+                walls.append(wall)
+    
+        return walls

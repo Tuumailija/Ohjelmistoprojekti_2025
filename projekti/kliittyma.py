@@ -155,24 +155,19 @@ class Kliittyma:
             game_map.draw(self.screen, cam_x, cam_y)
             player.draw(self.screen, cam_x, cam_y)
 
-            #walls = game_map.get_walls_in_radius(cam_x, cam_y, 250)
-            #self.ray_caster.set_obstacles(walls)
-            #for wall in walls:
-            #    pygame.draw.circle(self.screen, (255, 0, 0), (wall.x - cam_x, wall.y - cam_y, wall.width, wall.height), 5)
-            #self.ray_caster.update_rays(player.rect.center)
-            #self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
-            #walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 500)
-            #self.ray_caster.set_obstacles(walls)
-            #
-            ## Piirretään seinät ja lisätään kameran offset
-            #for wall in walls:
-            #    pygame.draw.rect(self.screen, (255, 0, 0), 
-            #                     pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
-            #
-            ## Päivitetään raycasterin säteet ja piirretään ne
-            #self.ray_caster.update_rays(player.rect.center)
-            #self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
+            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 2000)
+            adjusted_walls = [pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height) for wall in walls]
+            self.ray_caster.set_obstacles(adjusted_walls)
+            
+            # Piirretään seinät ja lisätään kameran offset
+            for wall in walls:
+                pygame.draw.rect(self.screen, (255, 0, 0), 
+                                 pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
+            
+            # Päivitetään raycasterin säteet ja piirretään ne
+            self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y))
+            self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
             
             pygame.display.flip()

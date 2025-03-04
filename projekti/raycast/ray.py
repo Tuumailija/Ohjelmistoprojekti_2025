@@ -14,9 +14,6 @@ class Ray:
         ray_end = ray_start + self.dir * self.ray_length
 
         for rect in obstacles:
-            if not isinstance(rect, pygame.Rect):
-                continue
-
             hit_point = self.raycast_rect(ray_start, ray_end, rect)
             if hit_point:
                 dist = ray_start.distance_to(hit_point)
@@ -24,29 +21,26 @@ class Ray:
                     min_dist = dist
                     closest = hit_point
 
-        return closest if closest else ray_end
+        return closest if closest else ray_end  # Pysäyttää säteen seinän kohdalle
+
+
 
     def raycast_rect(self, start, end, rect):
-        """Laskee törmäyksen säteen ja suorakulmion välillä"""
-        edges = [
-            ((rect.left, rect.top), (rect.right, rect.top)),  # Yläreuna
-            ((rect.right, rect.top), (rect.right, rect.bottom)),  # Oikea reuna
-            ((rect.right, rect.bottom), (rect.left, rect.bottom)),  # Alareuna
-            ((rect.left, rect.bottom), (rect.left, rect.top)),  # Vasen reuna
-        ]
+        """Laskee säteen ja suorakulmion osumat tarkasti"""
+        clipped = rect.clipline(start, end)  # Pygame sisäänrakennettu törmäyksen tarkistus
+    
+        if clipped:
+            hit_start = pygame.Vector2(clipped[0])
+            hit_end = pygame.Vector2(clipped[1])
+    
+            if start.distance_to(hit_start) < start.distance_to(hit_end):
+                return hit_start
+            else:
+                return hit_end
+    
+        return None
 
-        closest_hit = None
-        min_dist = float("inf")
 
-        for edge in edges:
-            hit = self.raycast_line(start, end, edge[0], edge[1])
-            if hit:
-                dist = start.distance_to(hit)
-                if dist < min_dist:
-                    min_dist = dist
-                    closest_hit = hit
-
-        return closest_hit
 
     def raycast_line(self, start, end, line_start, line_end):
         """Laskee törmäyspisteen viivan ja säteen välillä"""
