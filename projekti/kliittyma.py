@@ -156,7 +156,7 @@ class Kliittyma:
             player.draw(self.screen, cam_x, cam_y)
 
 
-            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 2000)
+            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 1000)
             adjusted_walls = [pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height) for wall in walls]
             self.ray_caster.set_obstacles(adjusted_walls)
             

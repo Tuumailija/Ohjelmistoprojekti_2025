@@ -117,8 +117,8 @@ class Map:
         center = pygame.Vector2(x, y)
     
         for wall in self.wall_rects:
-            wall_center = pygame.Vector2(wall.centerx, wall.centery)
-            if center.distance_to(wall_center) <= radius:
+            wall_rect = pygame.Rect(wall.x, wall.y, wall.width, wall.height)
+            if wall_rect.collidepoint(center) or wall_rect.inflate(radius * 2, radius * 2).collidepoint(center):
                 walls.append(wall)
-    
+        
         return walls
