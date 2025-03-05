@@ -110,8 +110,9 @@ class Kliittyma:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     return
-                
-    """ KOMMENTOITU POIS VÄLIAIKAISESTI KOSKA EN TIEDÄ MITEN INTERACTAA MAPIN LUOMISKOODIN KANSSA T. MIIKA
+
+    # Ei tällä hetkellä vaikuta muuttavan mitään kun peliä runnataan        
+    """
     def generoi_esteet(self, määrä=5):
         # Luo satunnaisia esteitä ja tallentaa ne listaan.
         self.esteet = []
@@ -125,11 +126,12 @@ class Kliittyma:
     """
 
     def kaynnista_peli(self):
-        """Runs the main game loop inside the menu system."""
+        # Käynnistää pelin main menu ruutuun
         self.game_running = True
         matrix = Kartta.generoi_tile_matriisi()
         game_map = Map(matrix)
     
+        # Luodaan pelaaja ja asetetaan aloituspaikka
         start_r, start_c = MATRIX_ROWS // 2, 0
         start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
         start_y = (start_r * CELL_HEIGHT + 1 + 8 // 2) * TILE_SIZE
@@ -146,14 +148,13 @@ class Kliittyma:
 
             player.move(pygame.key.get_pressed(), game_map.wall_rects)
 
-
+            # Kamera seuraa pelaajaa
             cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
             cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
 
-
+            # Piirretään kartta
             self.screen.fill((0, 0, 0))
             game_map.draw(self.screen, cam_x, cam_y)
-
 
             walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 1000)
             adjusted_walls = [pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height) for wall in walls]
@@ -168,6 +169,7 @@ class Kliittyma:
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y))
             self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
+            # Piirretään pelaaja
             player.draw(self.screen, cam_x, cam_y)
             
             pygame.display.flip()
