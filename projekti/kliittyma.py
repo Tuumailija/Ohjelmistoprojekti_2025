@@ -24,8 +24,9 @@ class Kliittyma:
         self.clock = pygame.time.Clock()
         self.ray_caster = RayCaster(self.screen, ray_length=1000)
         self.game_running = False
-
         self.musiikki_soi = False
+
+        self.viholliset = []
 
     def valikko_musiikki(self):
         musiikki_polku = os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Aloitusmusiikki.mp3")
@@ -147,6 +148,15 @@ class Kliittyma:
         self.ray_caster.set_obstacles(self.esteet)  # Lähetetään esteet RayCasterille
     """
 
+    def luo_viholliset(self, game_map, maara):
+        viholliset = []
+        vapaat_ruudut = [(x, y) for y in range(len(game_map.tilemap)) for x in range(len(game_map.tilemap[y])) if game_map.tilemap[y][x] == 0]
+        for _ in range(maara):
+            x, y = random.choice(vapaat_ruudut)
+            viholliset.append(Vihollinen(x * TILE_SIZE, y * TILE_SIZE))
+        return viholliset
+
+
     def kaynnista_peli(self):
         # Käynnistää pelin main menu ruutuun
         self.game_running = True
@@ -195,7 +205,7 @@ class Kliittyma:
             player.draw(self.screen, cam_x, cam_y)
 
             # Piirretään vihollinen
-            vihollinen = Vihollinen()
-            vihollinen.piirrä(self.screen, cam_x, cam_y)
+            for vihollinen in self.viholliset:
+                vihollinen.piirrä(self.screen, cam_x, cam_y)
             
             pygame.display.flip()
