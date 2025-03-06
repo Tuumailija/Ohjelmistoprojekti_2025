@@ -159,6 +159,7 @@ class Kliittyma:
 
 
     def kaynnista_peli(self):
+        #pygame.display.set_mode((800, 600))
         # Käynnistää pelin main menu ruutuun
         self.game_running = True
         matrix = Kartta.generoi_tile_matriisi()
@@ -189,7 +190,7 @@ class Kliittyma:
             self.screen.fill((0, 0, 0))
             game_map.draw(self.screen, cam_x, cam_y)
 
-            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 1000)
+            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 2000)
             adjusted_walls = [pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height) for wall in walls]
             self.ray_caster.set_obstacles(adjusted_walls)
             

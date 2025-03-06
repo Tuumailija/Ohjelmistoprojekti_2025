@@ -3,7 +3,7 @@ import pygame
 import math
 from .ray import Ray
 
-rayNumber = 360
+rayNumber = (360//2)
 fieldOfVision = linspace(0, 360/4, rayNumber)
 
 class RayCaster:
@@ -29,4 +29,7 @@ class RayCaster:
         """Piirtää säteet alkaen pelaajan sijainnista."""
         points = self.cast_rays()
         for point in points:
-            pygame.draw.line(self.screen, (255, 255, 255), pos, point, 1)
+            pygame.draw.line(self.screen, (255, 255, 255), pos, point[1], 1)
+            if len(point) > 2:
+                for i in range(len(point)-2):
+                    pygame.draw.line(self.screen, (255, 255, 255), point[i+1], point[i+2], 1)
