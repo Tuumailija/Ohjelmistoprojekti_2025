@@ -6,6 +6,7 @@ from tile_kartta import Kartta
 from MapGen import Map
 from player import Player
 from raycast import RayCaster
+from Vihollinen import Vihollinen
 
 # Constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1080
@@ -192,5 +193,9 @@ class Kliittyma:
 
             # Piirretään pelaaja
             player.draw(self.screen, cam_x, cam_y)
+
+            # Piirretään vihollinen
+            vihollinen = Vihollinen()
+            vihollinen.piirrä(self.screen, cam_x, cam_y)
             
             pygame.display.flip()
