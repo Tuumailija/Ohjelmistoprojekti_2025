@@ -15,6 +15,9 @@ MATRIX_ROWS, MATRIX_COLS = Kartta.korkeus, Kartta.pituus
 class Kliittyma:
     def __init__(self):
         pygame.init()
+        pygame.mixer.pre_init(44100, -16, 2, 512)
+        pygame.mixer.init()
+
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Peli")
         self.clock = pygame.time.Clock()
@@ -24,14 +27,17 @@ class Kliittyma:
         self.musiikki_soi = False
 
     def valikko_musiikki(self):
-        musiikki_polku = os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "media", "Aloitusmusiikki.mp3")
+        musiikki_polku = os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Aloitusmusiikki.mp3")
         if os.path.exists(musiikki_polku): # Tarkistaa onko musiikki tiedosto olemassa, niin ei kräshää 
+            print(f"Ladataan musiikkia: {musiikki_polku}")
             pygame.mixer.init()
             pygame.mixer.music.load(musiikki_polku)
-            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(1.0)
+            pygame.mixer.music.play()
             self.musiikki_soi = True
         else :
-            print("Aloitusmusiikkia ei löytynyt")
+            print(f"Aloitusmusiikkia ei löytynyt polusta: {musiikki_polku}")
+            # pygame.mixer.quit()
 
     def lopeta_valikko_musiikki(self):
         if self.musiikki_soi:
@@ -41,20 +47,35 @@ class Kliittyma:
 
     def peli_musiikki(self):
         musiikin_polku = [
-            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "media", "Taustamusiikki.mp3"),
-            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "media", "Taustamusiikki2.mp3"),
-            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "media", "Taustamusiikki3.mp3"),
-            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "media", "Taustamusiikki4.mp3"),
+            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Taustamusiikki.mp3"),
+            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Taustamusiikki2.mp3"),
+            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Taustamusiikki3.mp3"),
+            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Taustamusiikki4.mp3"),
         ]
         musiikki = random.choice(musiikin_polku)
         if os.path.exists(musiikki): # Tarkistaa onko musiikki tiedosto olemassa, niin ei kräshää
+            print(f"Ladataan musiikkia: {musiikki}")
             pygame.mixer.init()
             pygame.mixer.music.load(musiikki)
-            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(1.0)
+            pygame.mixer.music.play()
         else:
-            print("Taustamusiikkia ei löytynyt")
+            print(f"Taustamusiikkia ei löytynyt polusta: {musiikki}")
+            # pygame.mixer.quit()
 
 
+    """  def Kuolema_aani(self):
+        kuolema_aani_polku = os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Kuolema_aani.mp3")
+        if os.path.exists(kuolema_aani_polku): # Tarkistaa onko musiikki tiedosto olemassa, niin ei kräshää
+            pygame.mixer.init()
+            pygame.mixer.music.load(kuolema_aani_polku)
+            pygame.mixer.music.play()
+
+        else:
+            print("Kuolema ääntä ei löytynyt")
+            # pygame.mixer.quit()
+            
+            """  # Tämä muokataan vielä myöhemmin kun pelaajan hitscan on valmis ja liitetään eri metodiin T. Markus
 
 
 
