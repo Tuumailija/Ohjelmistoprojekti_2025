@@ -1,3 +1,4 @@
+import math
 import pygame
 import random
 import sys
@@ -186,11 +187,32 @@ class Kliittyma:
                 pygame.draw.rect(self.screen, (255, 0, 0), 
                                  pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
             
+
+            # Laske kulma pelaajan ja hiiren välillä
+            angle = self.kulma_pelaajan_ja_hiiren_valilla(player, cam_x, cam_y)
+            
             # Päivitetään raycasterin säteet ja piirretään ne
-            self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y))
+            self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y), angle)
             self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
             # Piirretään pelaaja
             player.draw(self.screen, cam_x, cam_y)
             
             pygame.display.flip()
+
+    def kulma_pelaajan_ja_hiiren_valilla(self, player, cam_x, cam_y):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        player_x, player_y = player.rect.centerx, player.rect.centery
+
+        # Adjust for camera position
+        mouse_x += cam_x
+        mouse_y += cam_y
+
+        # Calculate the difference in x and y coordinates
+        dx = mouse_x - player_x
+        dy = mouse_y - player_y
+
+        # Calculate the angle in radians and then convert to degrees
+        angle = math.degrees(math.atan2(dy, dx))
+
+        return angle
