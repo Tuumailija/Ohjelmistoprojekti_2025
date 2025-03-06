@@ -39,24 +39,3 @@ class Ray:
                 return hit_end
     
         return None
-
-
-
-    def raycast_line(self, start, end, line_start, line_end):
-        """Laskee törmäyspisteen viivan ja säteen välillä"""
-        x1, y1 = line_start
-        x2, y2 = line_end
-        x3, y3 = start
-        x4, y4 = end
-
-        den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
-        if den == 0:
-            return None  # Ei törmäystä (viivat ovat yhdensuuntaiset)
-
-        t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den
-        u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den
-
-        if 0 <= t <= 1 and 0 <= u:
-            return pygame.Vector2(x1 + t * (x2 - x1), y1 + t * (y2 - y1))
-
-        return None  # Ei törmäystä
