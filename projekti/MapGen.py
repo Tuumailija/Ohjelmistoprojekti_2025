@@ -190,8 +190,8 @@ class Map:
         lights = []
         center = pygame.Vector2(cam_x, cam_y)
         for light in self.room_balls:
-            room_ball = pygame.draw.circle(screen, (255, 255, 0), 
-                                           (int(ball_pos[0] - cam_x), int(ball_pos[1] - cam_y)), 8)
+            room_ball = pygame.circle(screen, (255, 255, 0),
+                                      (int(ball_pos[0] - cam_x), int(ball_pos[1] - cam_y)), 8)
             if room_ball.collidepoint(center) or room_ball.inflate(radius * 2, radius * 2).collidepoint(center):
                 lights.append(light)
         return lights
