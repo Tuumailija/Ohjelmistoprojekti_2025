@@ -193,14 +193,13 @@ class Kliittyma:
 
             walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 1000)
             self.ray_caster.set_obstacles(walls)
-
             # Piirretään seinät ja lisätään kameran offset
             for wall in walls:
                 pygame.draw.rect(self.screen, (255, 0, 0), 
                                  pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
             
-            # Piirretään suorakulmio ruudun yläkulmaan
-            #pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(10, 10, SCREEN_WIDTH, 200))
+
+            lights = game_map.get_lights_in_radius(player.rect.centerx, player.rect.centery, 200)
 
             # Piirretään pallo pelaajan aloituspaikkaan
             pygame.draw.circle(self.screen, (0, 255, 0), (start_x - cam_x, start_y - cam_y), 10)
