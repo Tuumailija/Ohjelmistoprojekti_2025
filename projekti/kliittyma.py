@@ -13,6 +13,7 @@ from Vihollinen import Vihollinen
 SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1080
 CELL_WIDTH, CELL_HEIGHT, TILE_SIZE = 11, 9, 64
 MATRIX_ROWS, MATRIX_COLS = Kartta.korkeus, Kartta.pituus
+PHYSICS_RENDER_DIST=1000
 
 class Kliittyma:
     def __init__(self):
@@ -23,7 +24,7 @@ class Kliittyma:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Peli")
         self.clock = pygame.time.Clock()
-        self.ray_caster = RayCaster(self.screen, ray_length=1000)
+        self.ray_caster = RayCaster(self.screen, PHYSICS_RENDER_DIST)
         self.game_running = False
         self.musiikki_soi = False
 
@@ -191,7 +192,7 @@ class Kliittyma:
             self.screen.fill((0, 0, 0))
             game_map.draw(self.screen, cam_x, cam_y)
 
-            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 1000)
+            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST)
             self.ray_caster.set_obstacles(walls)
             # Piirretään seinät ja lisätään kameran offset
             for wall in walls:
@@ -199,11 +200,14 @@ class Kliittyma:
                                  pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
             
 
-            lights = game_map.get_lights_in_radius(player.rect.centerx, player.rect.centery, 200)
-
+            lights = game_map.get_lights_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST)
+            for light in lights:
+                pygame.draw.circle(self.screen, (255, 0, 0), (light[0] - cam_x, light[1] - cam_y), 10)
+            self.ray_caster.set_valot(lights)
+                
             # Piirretään pallo pelaajan aloituspaikkaan
-            pygame.draw.circle(self.screen, (0, 255, 0), (start_x - cam_x, start_y - cam_y), 10)
-            self.ray_caster.set_valot(pygame.Vector2(start_x - cam_x, start_y - cam_y))
+            #pygame.draw.circle(self.screen, (0, 255, 0), (start_x - cam_x, start_y - cam_y), 10)
+            #self.ray_caster.set_valot(pygame.Vector2(start_x - cam_x, start_y - cam_y))
 
             # Laske kulma pelaajan ja hiiren välillä
             angle = self.kulma_pelaajan_ja_hiiren_valilla(player, cam_x, cam_y)

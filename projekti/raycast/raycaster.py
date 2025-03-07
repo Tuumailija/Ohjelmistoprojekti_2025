@@ -18,14 +18,9 @@ class RayCaster:
 
     def set_obstacles(self, obstacles):
         self.obstacles = [pygame.Rect(wall.x - self.cam_x, wall.y - self.cam_y, wall.width, wall.height) for wall in obstacles]
-        
-        #omat Rect arvot ei käy, jos muuttaa resoluutiota !!!!!!!
-        #self.screen.get_width() | self.screen.get_height()
-        self.obstacles.append(pygame.Rect(0, 0, 1920, 108))
-        self.obstacles.append(pygame.Rect(0, 970, 1920, 100))
 
     def set_valot(self, valo_pos):
-        self.valot = [valo_pos]
+        self.valot = [(x - self.cam_x, y - self.cam_y) for x, y in valo_pos]
 
     def set_cam(self, x, y):
         self.cam_x = x
@@ -52,3 +47,4 @@ class RayCaster:
                         light_hit = Ray(point, 0, point.distance_to(light_pos)).cast_to_light(light_pos, self.obstacles)
                         if light_hit == light_pos:
                             pygame.draw.line(self.screen, (255, 255, 255), point, light_hit, 1)
+                        #pygame.draw.line(self.screen, (255, 255, 255), point, light_hit, 1)

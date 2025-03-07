@@ -1,7 +1,7 @@
 import pygame
 import math
 
-sadeSteps = 25
+sadeSteps = 25*2
 
 class Ray:
     def __init__(self, pos, angle, ray_length):
@@ -10,6 +10,11 @@ class Ray:
         self.ray_length = ray_length  # Maksimipituus säteelle
 
     def cast(self, obstacles):
+        #omat Rect arvot ei käy, jos muuttaa resoluutiota !!!!!!!
+        #self.screen.get_width() | self.screen.get_height()
+        esteet = obstacles.copy()
+        esteet.append(pygame.Rect(0, 0, 1920, 108))
+        esteet.append(pygame.Rect(0, 970, 1920, 100))
         closest = None
         min_dist = self.ray_length
         ray_start = self.pos
@@ -17,7 +22,7 @@ class Ray:
 
         hit_points = []  # Lista osumapisteille
 
-        for rect in obstacles:
+        for rect in esteet:
             hit_point = self.raycast_rect(ray_start, ray_end, rect)
             if hit_point:
                 dist = ray_start.distance_to(hit_point)
@@ -71,10 +76,10 @@ class Ray:
         """Lähettää säteen valopisteeseen ja palauttaa törmäyspisteen tai valopisteen."""
         ray_start = self.pos
         ray_end = pygame.Vector2(light_pos)
-        
+
         closest = None
         min_dist = ray_start.distance_to(ray_end)
-        
+
         for rect in obstacles:
             hit_point = self.raycast_rect(ray_start, ray_end, rect)
             if hit_point:
