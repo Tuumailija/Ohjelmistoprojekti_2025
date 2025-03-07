@@ -186,12 +186,11 @@ class Map:
                 walls.append(wall)
         return walls
     
-    def get_lights_in_radius(self, screen, cam_x, cam_y, radius, ball_pos):
-        lights = []
-        center = pygame.Vector2(cam_x, cam_y)
-        for light in self.room_balls:
-            room_ball = pygame.circle(screen, (255, 255, 0),
-                                      (int(ball_pos[0] - cam_x), int(ball_pos[1] - cam_y)), 8)
-            if room_ball.collidepoint(center) or room_ball.inflate(radius * 2, radius * 2).collidepoint(center):
-                lights.append(light)
-        return lights
+    def get_lights_in_radius(self, x, y, radius):
+        balls = []
+        center = pygame.Vector2(x, y)
+        for ball_pos in self.room_balls:
+            ball_center = pygame.Vector2(ball_pos[0], ball_pos[1])
+            if center.distance_to(ball_center) <= radius:
+                balls.append(ball_pos)
+        return balls
