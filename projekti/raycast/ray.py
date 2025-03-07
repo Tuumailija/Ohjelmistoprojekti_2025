@@ -1,7 +1,7 @@
 import pygame
 import math
 
-sadeSteps = 20
+sadeSteps = 25
 
 class Ray:
     def __init__(self, pos, angle, ray_length):

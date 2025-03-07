@@ -3,7 +3,7 @@ import pygame
 import math
 from .ray import Ray
 
-rayNumber = (360//32)
+rayNumber = (360//16)
 fieldOfVision = linspace(0, 360/4, rayNumber)
 
 class RayCaster:
@@ -18,6 +18,11 @@ class RayCaster:
 
     def set_obstacles(self, obstacles):
         self.obstacles = [pygame.Rect(wall.x - self.cam_x, wall.y - self.cam_y, wall.width, wall.height) for wall in obstacles]
+        
+        #omat Rect arvot ei käy, jos muuttaa resoluutiota !!!!!!!
+        #self.screen.get_width() | self.screen.get_height()
+        self.obstacles.append(pygame.Rect(0, 0, 1920, 108))
+        self.obstacles.append(pygame.Rect(0, 970, 1920, 100))
 
     def set_valot(self, valo_pos):
         self.valot = [valo_pos]
@@ -38,11 +43,12 @@ class RayCaster:
         """Piirtää säteet alkaen pelaajan sijainnista."""
         ray_points = self.cast_rays()
         for points in ray_points:
-            if points:
-                for point in points:
-                    pygame.draw.circle(self.screen, (255, 255, 0), point, 2)
-                    pygame.draw.line(self.screen, (255, 255, 255), pos, point, 1)
-                    if self.valot:
-                        for light_pos in self.valot:
-                            light_hit = Ray(point, 0, point.distance_to(light_pos)).cast_to_light(light_pos, self.obstacles)
+            pygame.draw.circle(self.screen, (255, 0, 255), points[-1], 10)
+            for point in points:
+                pygame.draw.circle(self.screen, (255, 255, 0), point, 2)
+                pygame.draw.line(self.screen, (255, 255, 255), pos, point, 1)
+                if self.valot:
+                    for light_pos in self.valot:
+                        light_hit = Ray(point, 0, point.distance_to(light_pos)).cast_to_light(light_pos, self.obstacles)
+                        if light_hit == light_pos:
                             pygame.draw.line(self.screen, (255, 255, 255), point, light_hit, 1)
