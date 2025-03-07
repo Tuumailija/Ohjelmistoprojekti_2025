@@ -3,7 +3,7 @@ import pygame
 import math
 from .ray import Ray
 
-rayNumber = (360//32)
+rayNumber = (360//16)
 fieldOfVision = linspace(0, 360/4, rayNumber)
 
 class RayCaster:
@@ -47,7 +47,8 @@ class RayCaster:
             for point in points:
                 pygame.draw.circle(self.screen, (255, 255, 0), point, 2)
                 pygame.draw.line(self.screen, (255, 255, 255), pos, point, 1)
-                #if self.valot:
-                #    for light_pos in self.valot:
-                #        light_hit = Ray(point, 0, point.distance_to(light_pos)).cast_to_light(light_pos, self.obstacles)
-                #        pygame.draw.line(self.screen, (255, 255, 255), point, light_hit, 1)
+                if self.valot:
+                    for light_pos in self.valot:
+                        light_hit = Ray(point, 0, point.distance_to(light_pos)).cast_to_light(light_pos, self.obstacles)
+                        if light_hit == light_pos:
+                            pygame.draw.line(self.screen, (255, 255, 255), point, light_hit, 1)
