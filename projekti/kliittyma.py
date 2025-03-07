@@ -4,7 +4,7 @@ import random
 import sys
 import os
 from tile_kartta import Kartta  
-from MapGen import Map
+from MapGen import Map, FLOOR, TILE_SIZE
 from player import Player
 from raycast import RayCaster
 from Vihollinen import Vihollinen
@@ -149,9 +149,10 @@ class Kliittyma:
         self.ray_caster.set_obstacles(self.esteet)  # Lähetetään esteet RayCasterille
     """
 
-    def luo_viholliset(self, game_map, maara):
+    def luo_viholliset(self, game_map, maara=40): #maara kertoo kuinka monta vihollista luodaan
         viholliset = []
-        vapaat_ruudut = [(x, y) for y in range(len(game_map.tilemap)) for x in range(len(game_map.tilemap[y])) if game_map.tilemap[y][x] == 0]
+        vapaat_ruudut = [(x, y) for y in range(len(game_map.tilemap)) for x in range(len(game_map.tilemap[y])) if game_map.tilemap[y][x] == FLOOR]
+
         for _ in range(maara):
             x, y = random.choice(vapaat_ruudut)
             viholliset.append(Vihollinen(x * TILE_SIZE, y * TILE_SIZE))
