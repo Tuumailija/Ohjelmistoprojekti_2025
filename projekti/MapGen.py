@@ -117,11 +117,8 @@ class Map:
         
         return wall_rects
 
+    # Luo jokaiselle huoneelle yhden pallon, joka sijoitetaan satunnaisesti jonkin huoneen seinän viereen
     def generate_room_balls(self):
-        """
-        Luo jokaiselle huoneelle (eli jokaiselle uniikille huone-ID:lle self.matrix:ssa)
-        yhden pallon, joka sijoitetaan satunnaisesti jonkin huoneen seinän viereen.
-        """
         room_cells = {}
         for r in range(len(self.matrix)):
             for c in range(len(self.matrix[r])):
@@ -144,7 +141,7 @@ class Map:
             room_top_tile = min_r * CELL_HEIGHT + 1
             room_bottom_tile = max_r * CELL_HEIGHT + 1 + ROOM_HEIGHT
             
-            # Muunnetaan reunat pikseleiksi kerrottuna TILE_SIZE:lla
+            # Sitten muunnetaan reunat pikseleiksi kerrottuna TILE_SIZE:lla
             room_left = room_left_tile * TILE_SIZE
             room_right = room_right_tile * TILE_SIZE
             room_top = room_top_tile * TILE_SIZE
