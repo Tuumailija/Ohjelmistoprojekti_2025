@@ -185,20 +185,24 @@ class Kliittyma:
             # Kamera seuraa pelaajaa
             cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
             cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
+            self.ray_caster.set_cam(cam_x, cam_y)
 
             # Piirretään kartta
             self.screen.fill((0, 0, 0))
             game_map.draw(self.screen, cam_x, cam_y)
 
-            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 2000)
-            adjusted_walls = [pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height) for wall in walls]
-            self.ray_caster.set_obstacles(adjusted_walls)
+            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, 1000)
+            self.ray_caster.set_obstacles(walls)
             
             # Piirretään seinät ja lisätään kameran offset
             for wall in walls:
                 pygame.draw.rect(self.screen, (255, 0, 0), 
                                  pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
             
+            # Piirretään pallo pelaajan aloituspaikkaan
+            pygame.draw.circle(self.screen, (0, 255, 0), (start_x - cam_x, start_y - cam_y), 10)
+
+            self.ray_caster.set_valot(pygame.Vector2(start_x - cam_x, start_y - cam_y))
 
             # Laske kulma pelaajan ja hiiren välillä
             angle = self.kulma_pelaajan_ja_hiiren_valilla(player, cam_x, cam_y)

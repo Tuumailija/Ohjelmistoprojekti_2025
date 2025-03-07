@@ -1,70 +1,86 @@
 import pygame
 import math
 
+sadeSteps = 20
+
 class Ray:
     def __init__(self, pos, angle, ray_length):
         self.pos = pygame.Vector2(pos)
-        self.dir = pygame.Vector2(math.cos(angle), math.sin(angle)).normalize()
+        self.dir = pygame.Vector2(math.cos(angle), math.sin(angle))
         self.ray_length = ray_length  # Maksimipituus säteelle
 
     def cast(self, obstacles):
-        points = [self.pos]
+        closest = None
+        min_dist = self.ray_length
         ray_start = self.pos
-        ray_dir = self.dir
-        reflections = 0
-        max_reflections = 3
+        ray_end = ray_start + self.dir * self.ray_length
 
-        while reflections <= max_reflections:
-            closest = None
-            min_dist = self.ray_length
-            ray_end = ray_start + ray_dir * self.ray_length
+        hit_points = []  # Lista osumapisteille
 
-            for rect in obstacles:
-                hit_point, normal = self.raycast_rect(ray_start, ray_end, rect)
-                if hit_point and normal.length() > 0:
-                    dist = ray_start.distance_to(hit_point)
-                    if dist < min_dist:
-                        min_dist = dist
-                        closest = hit_point
-                        hit_normal = normal
+        for rect in obstacles:
+            hit_point = self.raycast_rect(ray_start, ray_end, rect)
+            if hit_point:
+                dist = ray_start.distance_to(hit_point)
+                if dist < min_dist:
+                    min_dist = dist
+                    closest = hit_point
+                    hit_points = self.jaa_sade_osiin_absoluuttisesti(ray_start, closest, sadeSteps)
+                    hit_points.append(closest)  # Lisätään törmäyspiste
 
-            if closest and hit_normal.length() > 0:
-                points.append(closest)
-                reflections += 1
-                ray_dir = ray_dir.reflect(hit_normal).normalize()
-                ray_start = closest + hit_normal * 1  # Siirrä törmäyspisteestä pois kunnolla
+        if closest:
+            return hit_points  # Palautetaan osumapisteet
+        else:
+            hit_points = self.jaa_sade_osiin_absoluuttisesti(ray_start, ray_end, sadeSteps)
+            hit_points.append(ray_end)  # Lisätään lopetuspiste
+            return hit_points
+
+    def jaa_sade_osiin_absoluuttisesti(self, start, end, vali):
+        """Jakaa säteen osiin absoluuttisilla väleillä."""
+        pisteet = []
+        nykyinen_piste = start
+        kokonais_matka = start.distance_to(end)
+        kuljettu_matka = 0
+
+        while kuljettu_matka < kokonais_matka:
+            pisteet.append(nykyinen_piste)
+            kuljettu_matka += vali
+            if kuljettu_matka > kokonais_matka:
+                nykyinen_piste = end
             else:
-                points.append(ray_end)
-                break
+                suunta = (end - start).normalize()
+                nykyinen_piste = start + suunta * kuljettu_matka
 
-        return points
+        return pisteet
 
     def raycast_rect(self, start, end, rect):
-        clipped = rect.clipline(start, end)
+        """Laskee säteen ja suorakulmion osumat tarkasti"""
+        clipped = rect.clipline(start, end)  # Pygame sisäänrakennettu törmäyksen tarkistus
+    
         if clipped:
             hit_start = pygame.Vector2(clipped[0])
             hit_end = pygame.Vector2(clipped[1])
-            normal = self.get_normal(hit_start, rect)
+    
             if start.distance_to(hit_start) < start.distance_to(hit_end):
-                return hit_start, normal
+                return hit_start
             else:
-                return hit_end, normal
-        return None, None
-
-    def get_normal(self, point, rect):
-        epsilon = 1e-3
-        #if abs(point.x - rect.left) < epsilon:
-        #    print("Vasen seinä")
-        #if abs(point.x - rect.right) < epsilon:
-        #    print("Oikea seinä")
-        #if abs(point.y - rect.top) < epsilon:
-        #    print("Yläseinä")
-        #if abs(point.y - rect.bottom) < epsilon:
-        #    print("Alaseinä")
-
-        #!!!!!! TÄSSÄ EHKÄ VÄÄRIN LISÄTYT (1) ARVOT, MUISTUTUS JOS EI YHTÄKKIÄ TOIMI !!!!!!
-        if abs(point.x - rect.left) < epsilon: return pygame.Vector2(-1, 0)  # Vasen seinä
-        if abs(point.x + 1 - rect.right) < epsilon: return pygame.Vector2(1, 0)  # Oikea seinä
-        if abs(point.y - rect.top) < epsilon: return pygame.Vector2(0, -1)  # Yläseinä
-        if abs(point.y + 1 - rect.bottom) < epsilon: return pygame.Vector2(0, 1)  # Alaseinä
-        return pygame.Vector2(0, 0)
+                return hit_end
+    
+        return None
+    
+    def cast_to_light(self, light_pos, obstacles):
+        """Lähettää säteen valopisteeseen ja palauttaa törmäyspisteen tai valopisteen."""
+        ray_start = self.pos
+        ray_end = pygame.Vector2(light_pos)
+        
+        closest = None
+        min_dist = ray_start.distance_to(ray_end)
+        
+        for rect in obstacles:
+            hit_point = self.raycast_rect(ray_start, ray_end, rect)
+            if hit_point:
+                dist = ray_start.distance_to(hit_point)
+                if dist < min_dist:
+                    min_dist = dist
+                    closest = hit_point
+        
+        return closest if closest else ray_end
