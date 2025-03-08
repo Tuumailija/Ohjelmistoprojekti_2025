@@ -28,7 +28,9 @@ class Ray:
                 dist = ray_start.distance_to(hit_point)
                 if dist < min_dist:
                     min_dist = dist
-                    closest = hit_point
+                    #closest = hit_point
+                    dist -= 5
+                    closest = ray_start + self.dir * dist
                     hit_points = self.jaa_sade_osiin_absoluuttisesti(ray_start, closest, sadeSteps)
                     hit_points.append(closest)  # Lisätään törmäyspiste
 
