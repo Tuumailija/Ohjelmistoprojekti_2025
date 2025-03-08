@@ -30,6 +30,11 @@ class Kliittyma:
 
         self.viholliset = []
 
+        # Ladataan taustakuva StoneFloorTexture.png ja sitten tallennetaan sen mitat
+        self.background = pygame.image.load(os.path.join(os.getcwd(), "media", "Img", "StoneFloorTexture.png")).convert()
+        self.tile_width = self.background.get_width()
+        self.tile_height = self.background.get_height()
+
     def valikko_musiikki(self):
         musiikki_polku = os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Aloitusmusiikki.mp3")
         if os.path.exists(musiikki_polku): # Tarkistaa onko musiikki tiedosto olemassa, niin ei kräshää 
@@ -189,8 +194,14 @@ class Kliittyma:
             cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
             self.ray_caster.set_cam(cam_x, cam_y)
 
+            # Piirretään taustakuva toistuvasti niin, että se liukuu kameran mukana
+            start_x_tile = - (cam_x % self.tile_width)
+            start_y_tile = - (cam_y % self.tile_height)
+            for x in range(start_x_tile, SCREEN_WIDTH, self.tile_width):
+                for y in range(start_y_tile, SCREEN_HEIGHT, self.tile_height):
+                    self.screen.blit(self.background, (x, y))
+
             # Piirretään kartta
-            self.screen.fill((0, 0, 0))
             game_map.draw(self.screen, cam_x, cam_y)
 
             walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST)
