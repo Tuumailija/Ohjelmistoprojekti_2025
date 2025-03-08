@@ -3,8 +3,8 @@ import pygame
 import random
 import sys
 import os
-from tile_kartta import Kartta  
-from MapGen import Map, FLOOR, TILE_SIZE
+from tile_kartta import Kartta
+from MapGen import Map, FLOOR, TILE_SIZE, WALL
 from player import Player
 from raycast import RayCaster
 from Vihollinen import Vihollinen
@@ -171,6 +171,9 @@ class Kliittyma:
         self.game_running = True
         matrix = Kartta.generoi_tile_matriisi()
         game_map = Map(matrix)
+
+        # Luodaan x määrä vihollisia ja pistetään ne satunnaisesti
+        self.viholliset = self.luo_viholliset(game_map, 40)
     
         # Luodaan pelaaja ja asetetaan aloituspaikka
         start_r, start_c = MATRIX_ROWS // 2, 0

@@ -1,6 +1,6 @@
-# Vihollinen.py
 import pygame
 import random
+
 
 class Vihollinen:
     def __init__(self, x, y):
@@ -8,7 +8,7 @@ class Vihollinen:
         self.y = y
         self.leveys = 40
         self.pituus = 40
-        self.vari = (255, 0, 0)
+        self.vari = (255, 255, 255)  # Vihollinen on nyt valkoinen
         self.rect = pygame.Rect(self.x, self.y, self.leveys, self.pituus)
 
     def piirrä(self, screen, cam_x, cam_y):
