@@ -4,7 +4,7 @@ import random
 import sys
 import os
 from tile_kartta import Kartta
-from MapGen import Map, FLOOR, TILE_SIZE, WALL
+from MapGen import Map, FLOOR, TILE_SIZE, WALL, CELL_WIDTH, CELL_HEIGHT
 from player import Player
 from raycast import RayCaster
 from Vihollinen import Vihollinen
@@ -71,20 +71,6 @@ class Kliittyma:
         else:
             print(f"Taustamusiikkia ei löytynyt polusta: {musiikki}")
             # pygame.mixer.quit()
-
-
-    """  def Kuolema_aani(self):
-        kuolema_aani_polku = os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Kuolema_aani.mp3")
-        if os.path.exists(kuolema_aani_polku): # Tarkistaa onko musiikki tiedosto olemassa, niin ei kräshää
-            pygame.mixer.init()
-            pygame.mixer.music.load(kuolema_aani_polku)
-            pygame.mixer.music.play()
-
-        else:
-            print("Kuolema ääntä ei löytynyt")
-            # pygame.mixer.quit()
-            
-            """  # Tämä muokataan vielä myöhemmin kun pelaajan hitscan on valmis ja liitetään eri metodiin T. Markus
 
 
 
@@ -155,7 +141,7 @@ class Kliittyma:
         self.ray_caster.set_obstacles(self.esteet)  # Lähetetään esteet RayCasterille
     """
 
-    def luo_viholliset(self, game_map, maara=40): #maara kertoo kuinka monta vihollista luodaan
+    def luo_viholliset(self, game_map, maara=40):
         viholliset = []
         vapaat_ruudut = [(x, y) for y in range(len(game_map.tilemap)) for x in range(len(game_map.tilemap[y])) if game_map.tilemap[y][x] == FLOOR]
 
@@ -234,7 +220,7 @@ class Kliittyma:
             # Piirretään pelaaja
             player.draw(self.screen, cam_x, cam_y)
 
-            # Piirretään vihollinen
+            # Piirretään viholliset
             for vihollinen in self.viholliset:
                 vihollinen.piirrä(self.screen, cam_x, cam_y)
             
