@@ -84,7 +84,7 @@ class Ray:
             if hit_point:
                 return None
             
-        arvo = 10000 / vali**2
+        arvo = 1 / (vali/200)**2
         return arvo
     
     

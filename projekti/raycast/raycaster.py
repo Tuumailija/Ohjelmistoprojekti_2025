@@ -53,8 +53,17 @@ class RayCaster:
                         #if light_hit is not None:
                         #    pygame.draw.line(self.screen, (255, 255, 255), point, light_hit, 1)
                 #print(arvo)
-                color = (255, 255, 0, int(arvo * 128))  # Reduce alpha value for more transparency
-                s = pygame.Surface((arvo*100, arvo*100), pygame.SRCALPHA)  # Create a surface with alpha channel
-                pygame.draw.circle(s, color, (arvo*50, arvo*50), arvo*50)
-                self.screen.blit(s, (point[0] - arvo*50, point[1] - arvo*50))
+                
+
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_TAB]:
+                        font = pygame.font.SysFont(None, 12)
+                        text = font.render(f'{arvo:.4f}', True, (255, 255, 0))
+                        self.screen.blit(text, (point[0], point[1]))
+                else:
+                    color = (255, 255, 0, int(arvo * 128))  # Reduce alpha value for more transparency
+                    s = pygame.Surface((arvo*100, arvo*100), pygame.SRCALPHA)  # Create a surface with alpha channel
+                    pygame.draw.circle(s, color, (arvo*50, arvo*50), arvo*50)
+                    self.screen.blit(s, (point[0] - arvo*50, point[1] - arvo*50))
+
                 #pygame.draw.line(self.screen, (255, 255, 255), pos, point, 1)
