@@ -3,11 +3,11 @@ import os
 import random
 
 # Konfigurointikonstantit
-ROOM_WIDTH = 10    
-ROOM_HEIGHT = 8    
+ROOM_WIDTH = 20   
+ROOM_HEIGHT = 16   
 CELL_WIDTH = ROOM_WIDTH + 1  
 CELL_HEIGHT = ROOM_HEIGHT + 1  
-TILE_SIZE = 64
+TILE_SIZE = 32
 FLOOR, WALL, DOOR = 0, 1, 2
 COLOR_FLOOR, COLOR_WALL, COLOR_DOOR = (105, 105, 105), (25, 25, 25), (100, 50, 0)
 
@@ -20,7 +20,7 @@ class Map:
         self.map_width_px = len(self.tilemap[0]) * TILE_SIZE
         self.map_height_px = len(self.tilemap) * TILE_SIZE
 
-        # Uusi osio: luodaan pallot huoneisiin
+        # Luodaan pallot huoneisiin
         self.room_balls = self.generate_room_balls()
 
     def build_global_tilemap(self):
@@ -43,7 +43,6 @@ class Map:
         return tilemap
 
     def create_doors(self, tilemap, rows, cols):
-        # Tässä alkuperäinen ovien luontilogiikka, jota voit säilyttää tai muokata
         room_sizes = {}
         for r in range(rows):
             for c in range(cols):
@@ -59,22 +58,33 @@ class Map:
                 origin_x, origin_y = c * CELL_WIDTH, r * CELL_HEIGHT
                 if self.matrix[r][c] != 0:
                     room_a = self.matrix[r][c]
-                    # Vaakasuuntainen ovi: huoneet vierekkäin
+
+                    # Horizontal door
                     if c < cols - 1 and self.matrix[r][c + 1] != 0:
                         room_b = self.matrix[r][c + 1]
-                        if room_b != room_a and room_door_count[room_a] < room_max_doors[room_a] and room_door_count[room_b] < room_max_doors[room_b]:
-                            door_x, door_y = origin_x + ROOM_WIDTH + 1, origin_y + 1 + ROOM_HEIGHT // 2
+                        if room_b != room_a and room_door_count[room_a] < room_max_doors[room_a] and \
+                        room_door_count[room_b] < room_max_doors[room_b]:
+                            door_x = origin_x + ROOM_WIDTH + 1
+                            door_y = origin_y + 1 + ROOM_HEIGHT // 2
+                            # Aseta kolme vierekkäistä tileä pystysuunnassa (y-1, y ja y+1)
+                            tilemap[door_y - 1][door_x] = DOOR
                             tilemap[door_y][door_x] = DOOR
+                            tilemap[door_y + 1][door_x] = DOOR
                             room_door_count[room_a] += 1
                             room_door_count[room_b] += 1
                             self.doors.append((door_x, door_y, "vertical"))
-                    
-                    # Pystysuuntainen ovi: huoneet päällekkäin
+
+                    # Vertical door
                     if r < rows - 1 and self.matrix[r + 1][c] != 0:
                         room_b = self.matrix[r + 1][c]
-                        if room_b != room_a and room_door_count[room_a] < room_max_doors[room_a] and room_door_count[room_b] < room_max_doors[room_b]:
-                            door_x, door_y = origin_x + 1 + ROOM_WIDTH // 2, origin_y + ROOM_HEIGHT + 1
+                        if room_b != room_a and room_door_count[room_a] < room_max_doors[room_a] and \
+                        room_door_count[room_b] < room_max_doors[room_b]:
+                            door_x = origin_x + 1 + ROOM_WIDTH // 2
+                            door_y = origin_y + ROOM_HEIGHT + 1
+                            # Aseta kolme vierekkäistä tileä vaakasuunnassa (x-1, x ja x+1)
+                            tilemap[door_y][door_x - 1] = DOOR
                             tilemap[door_y][door_x] = DOOR
+                            tilemap[door_y][door_x + 1] = DOOR
                             room_door_count[room_a] += 1
                             room_door_count[room_b] += 1
                             self.doors.append((door_x, door_y, "horizontal"))
