@@ -40,11 +40,21 @@ class RayCaster:
         for points in ray_points:
             pygame.draw.circle(self.screen, (255, 0, 255), points[-1], 10)
             for point in points:
-                pygame.draw.circle(self.screen, (255, 255, 0), point, 2)
-                pygame.draw.line(self.screen, (255, 255, 255), pos, point, 1)
+                arvo = 0.0
                 if self.valot:
                     for light_pos in self.valot:
                         light_hit = Ray(point, 0, point.distance_to(light_pos)).cast_to_light(light_pos, self.obstacles)
-                        if light_hit == light_pos:
-                            pygame.draw.line(self.screen, (255, 255, 255), point, light_hit, 1)
-                        #pygame.draw.line(self.screen, (255, 255, 255), point, light_hit, 1)
+                        if light_hit is not None:
+                            arvo += light_hit
+                            if arvo >= 1:
+                                arvo = 1
+                        #if light_hit == light_pos:
+                        #    pygame.draw.line(self.screen, (255, 255, 255), point, light_hit, 1)
+                        #if light_hit is not None:
+                        #    pygame.draw.line(self.screen, (255, 255, 255), point, light_hit, 1)
+                #print(arvo)
+                color = (255, 255, 0, int(arvo * 128))  # Reduce alpha value for more transparency
+                s = pygame.Surface((arvo*100, arvo*100), pygame.SRCALPHA)  # Create a surface with alpha channel
+                pygame.draw.circle(s, color, (arvo*50, arvo*50), arvo*50)
+                self.screen.blit(s, (point[0] - arvo*50, point[1] - arvo*50))
+                #pygame.draw.line(self.screen, (255, 255, 255), pos, point, 1)

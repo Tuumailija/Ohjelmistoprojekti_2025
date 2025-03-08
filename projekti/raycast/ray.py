@@ -77,15 +77,27 @@ class Ray:
         ray_start = self.pos
         ray_end = pygame.Vector2(light_pos)
 
-        closest = None
-        min_dist = ray_start.distance_to(ray_end)
+        vali = ray_start.distance_to(ray_end)
 
         for rect in obstacles:
             hit_point = self.raycast_rect(ray_start, ray_end, rect)
             if hit_point:
-                dist = ray_start.distance_to(hit_point)
-                if dist < min_dist:
-                    min_dist = dist
-                    closest = hit_point
-        
-        return closest if closest else ray_end
+                return None
+            
+        arvo = 10000 / vali**2
+        return arvo
+    
+    
+    #def cast_to_light(self, light_pos, obstacles):
+    #    """Lähettää säteen valopisteeseen ja palauttaa törmäyspisteen tai valopisteen."""
+    #    ray_start = self.pos
+    #    ray_end = pygame.Vector2(light_pos)
+#
+    #    vali = ray_start.distance_to(ray_end)
+#
+    #    for rect in obstacles:
+    #        hit_point = self.raycast_rect(ray_start, ray_end, rect)
+    #        if hit_point:
+    #            return None
+    #        
+    #    return ray_end
