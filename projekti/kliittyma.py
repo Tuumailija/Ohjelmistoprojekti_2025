@@ -31,7 +31,7 @@ class Kliittyma:
         self.viholliset = []
 
         # Ladataan taustakuva StoneFloorTexture.png ja sitten tallennetaan sen mitat
-        self.background = pygame.image.load(os.path.join(os.getcwd(), "media", "Img", "StoneFloorTexture.png")).convert()
+        self.background = pygame.image.load(os.path.join(os.getcwd(),"projekti", "media", "Img", "StoneFloorTexture.png")).convert()
         self.tile_width = self.background.get_width()
         self.tile_height = self.background.get_height()
 
