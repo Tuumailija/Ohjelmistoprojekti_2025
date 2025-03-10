@@ -32,6 +32,7 @@ class Kliittyma:
 
         # Ladataan taustakuva StoneFloorTexture.png ja sitten tallennetaan sen mitat
         self.background = pygame.image.load(os.path.join(os.getcwd(),"projekti", "media", "Img", "StoneFloorTexture.png")).convert()
+        # Miika lisää tää saman lailla kun mun musiikit if lauseen sisään niin ei tule erroria koko ajan :) T. Markus
         self.tile_width = self.background.get_width()
         self.tile_height = self.background.get_height()
 
@@ -81,17 +82,24 @@ class Kliittyma:
     def piirra_valikko(self):
         optio_lista = ["Aloita peli", "Ohjeet", "Lopeta"]
         iso_fontti = pygame.font.SysFont("Arial", 60)
+    
         while True:
             self.screen.fill((0, 0, 0))
             mouse_pos = pygame.mouse.get_pos()
             valittu_optio = -1
-
+        
+            # Keskitetään valikon tekstit näyttöön
+            keski_x = self.screen.get_width() // 2
+            keski_y = self.screen.get_height() // 2 - (len(optio_lista) * 50 // 2)
+        
             for i, optio in enumerate(optio_lista):
                 teksti = iso_fontti.render(optio, True, (255, 255, 255))
-                teksti_rect = teksti.get_rect(center=(self.screen.get_width() // 2, 200 + i * 100))
+                teksti_rect = teksti.get_rect(center=(keski_x, keski_y + i * 100))
+            
                 if teksti_rect.collidepoint(mouse_pos):
                     teksti = iso_fontti.render(optio, True, (255, 0, 0))
                     valittu_optio = i
+            
                 self.screen.blit(teksti, teksti_rect)
 
             pygame.display.flip()
@@ -100,7 +108,6 @@ class Kliittyma:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if valittu_optio == 0:
                         self.kaynnista_peli()
-                        # pygame.mixer.quit() #Lopettaa aloitus musiikin soiton
                     elif valittu_optio == 1:
                         self.piirra_ohjeet()
                     elif valittu_optio == 2:
@@ -109,6 +116,7 @@ class Kliittyma:
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
+
 
     def piirra_ohjeet(self):
         self.screen.fill((0, 0, 0))
