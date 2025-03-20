@@ -37,7 +37,7 @@ class Kliittyma:
         self.tile_height = self.background.get_height()
 
     def valikko_musiikki(self):
-        musiikki_polku = os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Aloitusmusiikki.mp3")
+        musiikki_polku = pygame.mixer_music.load(os.path.join(os.getcwd(),"Ohjelmistoprojekti_2025", "projekti", "media", "Aloitusmusiikki.mp3")).convert()
         if os.path.exists(musiikki_polku): # Tarkistaa onko musiikki tiedosto olemassa, niin ei kräshää 
             print(f"Ladataan musiikkia: {musiikki_polku}")
             pygame.mixer.init()
@@ -165,8 +165,9 @@ class Kliittyma:
                         game_map.tilemap[y][x+1] == FLOOR):
                         vapaat_ruudut.append((x, y))
     
-        # Jos ei löydy turvallisia ruutuja, käytetään kaikkia lattiaruutuja
+        # Jos ei löydy vapaita ruutuja, käytetään kaikkia lattiaruutuja
         if not vapaat_ruudut:
+            print("Ei vapaita ruutuja, käytetään kaikkia lattiaruutuja")
             vapaat_ruudut = [(x, y) for y in range(rows) for x in range(cols) if game_map.tilemap[y][x] == FLOOR]
 
         for _ in range(maara):
