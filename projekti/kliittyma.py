@@ -151,7 +151,7 @@ class Kliittyma:
 
     def luo_viholliset(self, game_map, maara=50):
         viholliset = []
-        safe_vapaat_ruudut = []
+        vapaat_ruudut = []
         rows = len(game_map.tilemap)
         cols = len(game_map.tilemap[0])
         # Käydään läpi ruudukko (jätetään reunat pois)
@@ -163,14 +163,14 @@ class Kliittyma:
                         game_map.tilemap[y+1][x] == FLOOR and 
                         game_map.tilemap[y][x-1] == FLOOR and 
                         game_map.tilemap[y][x+1] == FLOOR):
-                        safe_vapaat_ruudut.append((x, y))
+                        vapaat_ruudut.append((x, y))
     
         # Jos ei löydy turvallisia ruutuja, käytetään kaikkia lattiaruutuja
-        if not safe_vapaat_ruudut:
-            safe_vapaat_ruudut = [(x, y) for y in range(rows) for x in range(cols) if game_map.tilemap[y][x] == FLOOR]
+        if not vapaat_ruudut:
+            vapaat_ruudut = [(x, y) for y in range(rows) for x in range(cols) if game_map.tilemap[y][x] == FLOOR]
 
         for _ in range(maara):
-            x, y = random.choice(safe_vapaat_ruudut)
+            x, y = random.choice(vapaat_ruudut)
             # Lasketaan vihollisen koordinaatit niin, että se sijoittuu ruudun keskelle.
             enemy_x = x * TILE_SIZE + TILE_SIZE // 2 - 20  # 20 = vihollisen leveys/2
             enemy_y = y * TILE_SIZE + TILE_SIZE // 2 - 20
