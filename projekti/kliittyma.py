@@ -149,7 +149,7 @@ class Kliittyma:
         self.ray_caster.set_obstacles(self.esteet)  # Lähetetään esteet RayCasterille
     """
 
-    def luo_viholliset(self, game_map, maara=50):
+    def luo_viholliset(self, game_map, maara=500):
         viholliset = []
         vapaat_ruudut = []
         rows = len(game_map.tilemap)
@@ -187,7 +187,7 @@ class Kliittyma:
         game_map = Map(matrix)
 
         # Luodaan x määrä vihollisia ja pistetään ne satunnaisesti
-        self.viholliset = self.luo_viholliset(game_map, 40)
+        self.viholliset = self.luo_viholliset(game_map, 500)
     
         # Luodaan pelaaja ja asetetaan aloituspaikka
         start_r, start_c = MATRIX_ROWS // 2, 0
