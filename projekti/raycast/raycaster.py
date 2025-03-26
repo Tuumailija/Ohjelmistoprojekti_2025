@@ -31,8 +31,12 @@ class RayCaster:
         self.cam_y = y
 
     def update_rays(self, pos, angle):
-        """Luo säteet pelaajan sijainnista."""
-        self.rays = [Ray(pos, math.radians(a + angle - 45), self.ray_length) for a in fieldOfVision]
+        """Luo säteet pelaajan sijainnista. Jokaisella säteellä on oma vaihe."""
+        self.rays = [
+            Ray(pos, math.radians(a + angle - 45), self.ray_length, i)
+            for i, a in enumerate(fieldOfVision)
+        ]
+
 
     def cast_rays(self):
         """Laskee säteiden loppupisteet ottaen huomioon suorakulmioesteet."""
@@ -75,7 +79,7 @@ class RayCaster:
     def get_light_mask(self):
         width, height = self.screen.get_size()
         mask = pygame.Surface((width, height), pygame.SRCALPHA)
-    
+
         for points in self.cast_rays():
             for point in points:
                 arvo = 0.0
@@ -84,12 +88,12 @@ class RayCaster:
                     if light_hit is not None:
                         arvo += light_hit
                 arvo = min(arvo, 1.0)
-    
+
                 if arvo > 0:
                     radius = 30
                     brightness = int(arvo * 255)
                     s = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
                     pygame.draw.circle(s, (brightness, brightness, brightness, 255), (radius, radius), radius)
                     mask.blit(s, (point[0] - radius, point[1] - radius), special_flags=pygame.BLEND_RGBA_ADD)
-    
+
         return mask
