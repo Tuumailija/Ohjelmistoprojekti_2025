@@ -7,7 +7,7 @@ rayNumber = (360//16)
 fieldOfVision = linspace(0, 360/4, rayNumber)
 
 class RayCaster:
-    def __init__(self, screen, ray_length=300):
+    def __init__(self, screen, ray_length):
         self.screen = screen
         self.rays = []
         self.ray_length = ray_length  # Maksimipituus säteille
