@@ -23,5 +23,5 @@ class Door:
         self.is_open = not self.is_open
 
     def draw(self, screen, cam_x, cam_y):
-        color = (100, 50, 0) if not self.is_open else (100, 180, 100)
+        color = (25,25,25) if not self.is_open else (100, 180, 100)
         pygame.draw.rect(screen, color, self.rect.move(-cam_x, -cam_y))

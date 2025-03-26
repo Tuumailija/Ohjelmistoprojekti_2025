@@ -183,8 +183,8 @@ class Kliittyma:
                                 door.toggle(self.kulma_pelaajan_ja_hiiren_valilla(player, 0, 0))
 
 
-            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST)
-            walls += [door.rect for door in game_map.doors if not door.is_open]
+            doors_in_radius = [door.rect for door in game_map.doors if not door.is_open and pygame.Vector2(door.rect.center).distance_to(pygame.Vector2(player.rect.center)) < PHYSICS_RENDER_DIST]
+            walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST) + doors_in_radius
             player.move(pygame.key.get_pressed(), walls)
 
             cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
