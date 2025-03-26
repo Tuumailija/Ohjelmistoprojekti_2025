@@ -191,25 +191,33 @@ class Kliittyma:
             cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
             self.ray_caster.set_cam(cam_x, cam_y)
 
+            # Piirretään taustakuva (lattiatekstuuri)
             start_x_tile = - (cam_x % self.tile_width)
             start_y_tile = - (cam_y % self.tile_height)
             for x in range(start_x_tile, SCREEN_WIDTH, self.tile_width):
                 for y in range(start_y_tile, SCREEN_HEIGHT, self.tile_height):
                     self.screen.blit(self.background, (x, y))
+            
+            # Haetaan valaistusmaski ja piirretään tekstuurin päälle
+            light_mask = self.ray_caster.get_light_mask()
+            self.screen.blit(light_mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
-            game_map.draw(self.screen, cam_x, cam_y)
+
+
+            #game_map.draw(self.screen, cam_x, cam_y)
 
             self.ray_caster.set_obstacles(walls)
             for wall in walls:
-                pygame.draw.rect(self.screen, (255, 0, 0), 
+                pygame.draw.rect(self.screen, (0, 0, 0), 
                                  pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
 
-            lights = game_map.get_lights_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST)
+            #Tarvittaessa suurennetaan
+            lights = game_map.get_lights_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST*1.5)
             self.ray_caster.set_valot(lights)
 
             angle = self.kulma_pelaajan_ja_hiiren_valilla(player, cam_x, cam_y)
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y), angle)
-            self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
+            #self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
             player.draw(self.screen, cam_x, cam_y)
 

@@ -2,6 +2,10 @@ from numpy import linspace
 import pygame
 import math
 from .ray import Ray
+import numpy as np
+import pygame.surfarray
+import scipy.ndimage
+
 
 rayNumber = (360//16)
 fieldOfVision = linspace(0, 360/4, rayNumber)
@@ -67,3 +71,25 @@ class RayCaster:
                     self.screen.blit(s, (point[0] - arvo*50, point[1] - arvo*50))
 
                 #pygame.draw.line(self.screen, (255, 255, 255), pos, point, 1)
+
+    def get_light_mask(self):
+        width, height = self.screen.get_size()
+        mask = pygame.Surface((width, height), pygame.SRCALPHA)
+    
+        for points in self.cast_rays():
+            for point in points:
+                arvo = 0.0
+                for light_pos in self.valot:
+                    light_hit = Ray(point, 0, point.distance_to(light_pos)).cast_to_light(light_pos, self.obstacles)
+                    if light_hit is not None:
+                        arvo += light_hit
+                arvo = min(arvo, 1.0)
+    
+                if arvo > 0:
+                    radius = 30
+                    brightness = int(arvo * 255)
+                    s = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
+                    pygame.draw.circle(s, (brightness, brightness, brightness, 255), (radius, radius), radius)
+                    mask.blit(s, (point[0] - radius, point[1] - radius), special_flags=pygame.BLEND_RGBA_ADD)
+    
+        return mask
