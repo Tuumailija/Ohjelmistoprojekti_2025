@@ -175,6 +175,7 @@ class Kliittyma:
         matrix = Kartta.generoi_tile_matriisi()
         game_map = Map(matrix)
         self.viholliset = self.luo_viholliset(game_map, 500)
+        self.hud_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)  # HUD layer
 
         start_r, start_c = MATRIX_ROWS // 2, 0
         start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
@@ -194,6 +195,8 @@ class Kliittyma:
                         for door in game_map.doors:
                             if pygame.Vector2(player.rect.center).distance_to(pygame.Vector2(door.x, door.y)) < 64:
                                 door.toggle(self.kulma_pelaajan_ja_hiiren_valilla(player, 0, 0))
+                    elif event.key == pygame.K_q:
+                        self.hud_splatter()
 
 
             doors_in_radius = [door.rect for door in game_map.doors if not door.is_open and pygame.Vector2(door.rect.center).distance_to(pygame.Vector2(player.rect.center)) < PHYSICS_RENDER_DIST]
@@ -215,8 +218,6 @@ class Kliittyma:
             light_mask = self.ray_caster.get_light_mask()
             self.screen.blit(light_mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
-
-
             #game_map.draw(self.screen, cam_x, cam_y)
 
             self.ray_caster.set_obstacles(walls)
@@ -237,7 +238,11 @@ class Kliittyma:
             for vihollinen in self.viholliset:
                 vihollinen.piirra(self.screen, cam_x, cam_y)
 
+            """self.hud_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)  # HUD layer
+            pygame.draw.rect(self.hud_surface, (255, 0, 0), (0, 0, SCREEN_WIDTH-20, SCREEN_HEIGHT-20), 20)  # Semi-transparent bar
+            self.screen.blit(self.hud_surface, (0, 0))  # Draw HUD surface"""
 
+            self.screen.blit(self.hud_surface, (0, 0))  # Draw HUD surface
             pygame.display.flip()
 
     def kulma_pelaajan_ja_hiiren_valilla(self, player, cam_x, cam_y):
@@ -249,3 +254,7 @@ class Kliittyma:
         dy = mouse_y - player_y
         angle = math.degrees(math.atan2(dy, dx))
         return angle
+
+    def hud_splatter(self):
+        borderwidth = 50
+        pygame.draw.rect(self.hud_surface, (255, 0, 0), (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), borderwidth) # punainen ruutu
