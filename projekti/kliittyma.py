@@ -31,24 +31,33 @@ class Kliittyma:
 
         self.viholliset = []
 
-        taustakuva = os.path.join(os.getcwd(), "projekti" ,"media", "Img", "StoneFloorTexture.png")
+        taustakuva = os.path.join(os.getcwd(),"media", "Img", "StoneFloorTexture.png")
         if os.path.exists(taustakuva):
             self.background = pygame.image.load(taustakuva).convert()
             self.tile_width = self.background.get_width()
             self.tile_height = self.background.get_height()
         else:
             print(f"Taustakuvaa ei löytynyt polusta: {taustakuva}")
+            self.tile_width = TILE_SIZE
+            self.tile_height = TILE_SIZE
+            self.background = pygame.Surface((self.tile_width, self.tile_height))
+            self.background.fill((100, 100, 100)) #Lataa harmaan lattian
 
     def valikko_musiikki(self):
-        musiikki_polku = pygame.mixer_music.load(os.path.join(os.getcwd(),"Ohjelmistoprojekti_2025", "projekti", "media", "Aloitusmusiikki.mp3")).convert()
+        # Hae tämän tiedoston sijainti
+        base_dir = os.path.dirname(__file__)
+    
+        # Muodosta polku suhteessa tiedostoon
+        musiikki_polku = os.path.join(base_dir,"projekti", "media", "Aloitusmusiikki.mp3")
+
         if os.path.exists(musiikki_polku):
             print(f"Ladataan musiikkia: {musiikki_polku}")
             pygame.mixer.init()
             pygame.mixer.music.load(musiikki_polku)
             pygame.mixer.music.set_volume(1.0)
-            pygame.mixer.music.play()
+            pygame.mixer.music.play(-1)  # -1 = looppiin
             self.musiikki_soi = True
-        else :
+        else:
             print(f"Aloitusmusiikkia ei löytynyt polusta: {musiikki_polku}")
 
     def lopeta_valikko_musiikki(self):
@@ -58,10 +67,10 @@ class Kliittyma:
 
     def peli_musiikki(self):
         musiikin_polku = [
-            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Taustamusiikki.mp3"),
-            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Taustamusiikki2.mp3"),
-            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Taustamusiikki3.mp3"),
-            os.path.join(os.getcwd(), "Ohjelmistoprojekti_2025", "projekti", "media", "Taustamusiikki4.mp3"),
+            os.path.join(os.getcwd(),"projekti", "media", "Taustamusiikki.mp3"),
+            os.path.join(os.getcwd(),"projekti", "media", "Taustamusiikki2.mp3"),
+            os.path.join(os.getcwd(),"projekti", "media", "Taustamusiikki3.mp3"),
+            os.path.join(os.getcwd(),"projekti", "media", "Taustamusiikki4.mp3"),
         ]
         musiikki = random.choice(musiikin_polku)
         if os.path.exists(musiikki):
@@ -119,9 +128,9 @@ class Kliittyma:
         ohjeet_teksti = [
             "Ohjeet:",
             "Käytä WASD-näppäimiä liikkuaksesi ympäri karttaa.",
-            "Paina E-npääintä avataksesi ovia.",
+            "Paina E-näppäintä avataksesi ovia.",
             "Käytä hiirtä kääntääksesi pelaajan katsetta.",
-            "Poistu ohjeista painamalla ESC"
+            "Poistu ohjeista painamalla ESC",
         ]
         pieni_fontti = pygame.font.SysFont("Arial", 40)
         for i, rivi in enumerate(ohjeet_teksti):
@@ -146,6 +155,8 @@ class Kliittyma:
                         game_map.tilemap[y][x-1] == FLOOR and 
                         game_map.tilemap[y][x+1] == FLOOR):
                         vapaat_ruudut.append((x, y))
+        print("Löydetty vapaita ruutuja:", len(vapaat_ruudut))
+    
         if not vapaat_ruudut:
             print("Ei vapaita ruutuja, käytetään kaikkia lattiaruutuja")
             vapaat_ruudut = [(x, y) for y in range(rows) for x in range(cols) if game_map.tilemap[y][x] == FLOOR]
@@ -155,7 +166,9 @@ class Kliittyma:
             enemy_x = x * TILE_SIZE + TILE_SIZE // 2 - 20
             enemy_y = y * TILE_SIZE + TILE_SIZE // 2 - 20
             viholliset.append(Vihollinen(enemy_x, enemy_y))
+        print("Luodaan vihollisia:", len(viholliset))
         return viholliset
+
 
     def kaynnista_peli(self):
         self.game_running = True
@@ -222,7 +235,8 @@ class Kliittyma:
             player.draw(self.screen, cam_x, cam_y)
 
             for vihollinen in self.viholliset:
-                vihollinen.piirrä(self.screen, cam_x, cam_y)
+                vihollinen.piirra(self.screen, cam_x, cam_y)
+
 
             pygame.display.flip()
 

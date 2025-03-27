@@ -8,7 +8,10 @@ class Vihollinen:
         self.y = y
         self.leveys = 40
         self.pituus = 40
-        sprite_path = os.path.join("projekti", "media", "Img", "Vihollinen_testi.png")
+        
+        base_dir = os.path.dirname(__file__)
+        sprite_path = os.path.join(base_dir, "projekti", "media", "Img", "Vihollinen_testi.png")
+        
         if os.path.exists(sprite_path):
             self.sprite = pygame.image.load(sprite_path).convert_alpha()
             # Skaalataan sprite vastaamaan vihollisen kokoa
@@ -19,8 +22,37 @@ class Vihollinen:
             self.vari = (255, 255, 255)  # Vihollinen on valkoinen varavärinä jos spriteä ei löydy
 
         self.rect = pygame.Rect(self.x, self.y, self.leveys, self.pituus)
+        
+        # Aseta viholliselle liikkumisnopeus ja satunnainen alkuperäinen liikesuunta
+        self.speed = 2  #Vihollisen vauhti
+        self.direction = pygame.Vector2(random.choice([-1, 1]), random.choice([-1, 1])).normalize()
+        self.frame_counter = 0
+        self.change_direction_time = random.randint(30, 120)  # satunnaisia ruudun päivityksiä ennen suunnan vaihtoa
 
-    def piirrä(self, screen, cam_x, cam_y):
+    def update(self, walls):
+        """Päivittää vihollisen sijainnin ja tarkistaa törmäykset."""
+        self.frame_counter += 1
+        if self.frame_counter >= self.change_direction_time:
+            # Vaihdetaan satunnainen suunta
+            self.direction = pygame.Vector2(random.choice([-1, 1]), random.choice([-1, 1])).normalize()
+            self.frame_counter = 0
+            self.change_direction_time = random.randint(30, 120)
+        
+        # Tallennetaan vanha sijainti törmäyksen varalta
+        old_rect = self.rect.copy()
+        # Liikutetaan vihollista nykyisen suunnan mukaisesti
+        self.rect.x += int(self.direction.x * self.speed)
+        self.rect.y += int(self.direction.y * self.speed)
+        
+        # Tarkistetaan törmäykset annettujen "wall"-elementtien kanssa
+        for wall in walls:
+            if self.rect.colliderect(wall):
+                self.rect = old_rect  # Palautetaan edellinen sijainti
+                # Vaihdetaan suuntaa törmäyksen jälkeen
+                self.direction = pygame.Vector2(random.choice([-1, 1]), random.choice([-1, 1])).normalize()
+                break
+
+    def piirra(self, screen, cam_x, cam_y):
         if self.sprite:
             screen.blit(self.sprite, (self.rect.x - cam_x, self.rect.y - cam_y))
         else:
