@@ -24,10 +24,11 @@ class Kliittyma:
 
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Peli")
-        self.clock = pygame.time.Clock()
         self.ray_caster = RayCaster(self.screen, PHYSICS_RENDER_DIST)
         self.game_running = False
         self.musiikki_soi = False
+
+        self.clock = pygame.time.Clock()
 
         self.viholliset = []
 
@@ -188,19 +189,25 @@ class Kliittyma:
                     pygame.quit()
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE: # ESC-näppäin pelin lopettamista varten
+                    if event.key == pygame.K_ESCAPE:
                         self.game_running = False
                         return
-                    elif event.key == pygame.K_e: # E-näppäin ovien avaamista varten
+                    elif event.key == pygame.K_e:
                         for door in game_map.doors:
                             if pygame.Vector2(player.rect.center).distance_to(pygame.Vector2(door.x, door.y)) < 64:
                                 door.toggle(self.kulma_pelaajan_ja_hiiren_valilla(player, 0, 0))
                     elif event.key == pygame.K_q:
                         self.hud_splatter()
-
+            
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    player.attack()
 
             doors_in_radius = [door.rect for door in game_map.doors if not door.is_open and pygame.Vector2(door.rect.center).distance_to(pygame.Vector2(player.rect.center)) < PHYSICS_RENDER_DIST]
             walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST) + doors_in_radius
+            
+            dt = self.clock.tick(60)
+            player.update(dt)
+            
             player.move(pygame.key.get_pressed(), walls)
 
             cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
@@ -233,7 +240,7 @@ class Kliittyma:
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y), angle)
             #self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
-            player.draw(self.screen, cam_x, cam_y, angle+90)
+            player.draw(self.screen, cam_x, cam_y, angle)
 
             for vihollinen in self.viholliset:
                 vihollinen.piirra(self.screen, cam_x, cam_y)
