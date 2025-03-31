@@ -240,7 +240,9 @@ class Kliittyma:
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y), angle)
             #self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
+            player.set_lighting(lights, walls)  # ← tämä ennen player.draw(...)
             player.draw(self.screen, cam_x, cam_y, angle)
+
 
             for vihollinen in self.viholliset:
                 vihollinen.piirra(self.screen, cam_x, cam_y)

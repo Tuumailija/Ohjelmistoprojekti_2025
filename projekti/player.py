@@ -1,6 +1,8 @@
 import pygame
 import os
 import math
+from raycast import Ray
+
 
 PLAYER_SIZE = 32
 PLAYER_SPEED = 5
@@ -29,18 +31,29 @@ class Player:
         else:
             print(f"Virhe: Asekuvaa ei löytynyt polusta: {ase_path}")
             self.ase_image = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE), pygame.SRCALPHA)
-            pygame.draw.rect(self.ase_image, (255, 0, 0), self.ase_image.get_rect())  # punainen neliö aseeksi
+            pygame.draw.rect(self.ase_image, (255, 0, 0), self.ase_image.get_rect())
 
-        # Lyöntitila
         self.is_attacking = False
         self.attack_timer = 0
-        self.attack_duration = 200  # ms
-
-        # Suunta
-        self.angle = 0  # Kulma, johon pelaaja katsoo
-
-        # Aseen oletuspaikka pelaajan oikealla puolella
+        self.attack_duration = 200
+        self.angle = 0
         self.weapon_offset_local = pygame.Vector2(-7, 15)
+
+        self.light_intensity = 1.0
+
+    def set_lighting(self, light_positions, obstacles):
+        """Päivittää pelaajan valaistusarvon ympäröivien valojen perusteella"""
+        arvo = 0.0
+        point = pygame.Vector2(self.rect.center)
+        for light_pos in light_positions:
+            ray = Ray(point, 0, point.distance_to(light_pos))
+            light_value = ray.cast_to_light(light_pos, obstacles)
+            if light_value is not None:
+                arvo += light_value
+        arvo *= 3
+        arvo = min(arvo, 1.0)
+        arvo = max(arvo, 0.2)
+        self.light_intensity = arvo
 
     def move(self, keys, walls):
         dx = dy = 0
@@ -66,12 +79,9 @@ class Player:
         self.attack_timer = self.attack_duration
 
     def draw(self, screen, cam_x, cam_y, angle):
-        self.angle = angle  # Päivitä kulma pelaajan katseeseen
+        self.angle = angle
 
-        # Pelaajan keskipiste ruudulla
         center = pygame.Vector2(self.rect.centerx - cam_x, self.rect.centery - cam_y)
-
-        # Aseen paikan laskeminen
         offset_rotated = self.weapon_offset_local.rotate(self.angle)
 
         attack_offset = pygame.Vector2(0, 0)
@@ -80,66 +90,56 @@ class Player:
             attack_offset = pygame.Vector2(math.cos(radians), math.sin(radians)) * 55
 
         ase_pos = center + offset_rotated + attack_offset
-
-        # Pyöritetään ase ja pelaajan kuva
         rotated_ase = pygame.transform.rotate(self.ase_image, -self.angle)
         rotated_hattu = pygame.transform.rotate(self.hattu_image, -self.angle)
+
+        # --- Kirkkauden säätö --- #
+        def apply_brightness(surface, brightness):
+            temp = surface.copy()
+            darken = pygame.Surface(temp.get_size()).convert_alpha()
+            darken.fill((brightness, brightness, brightness, 255))
+            temp.blit(darken, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+            return temp
+
+        brightness = int(self.light_intensity * 255)
+        rotated_ase = apply_brightness(rotated_ase, brightness)
+        rotated_hattu = apply_brightness(rotated_hattu, brightness)
 
         ase_rect = rotated_ase.get_rect(center=ase_pos)
         hattu_rect = rotated_hattu.get_rect(center=center)
 
-        # --- Luo asepinta maskattavaksi ---
+        # Asemaskaus
         ase_surface = pygame.Surface(rotated_ase.get_size(), pygame.SRCALPHA)
         ase_surface.blit(rotated_ase, (0, 0))
-    
-        # Luo maski
         mask = pygame.Surface(rotated_ase.get_size(), pygame.SRCALPHA)
         w, h = mask.get_size()
-    
-        # Laske maskin keskipiste niin että se vastaa pelaajan sijaintia aseen pinnalla
-        # Ero pelaajan ja aseen sijainnin välillä
         ase_center_on_screen = pygame.Vector2(ase_rect.center)
         player_center_on_screen = center
         ase_to_player_offset = player_center_on_screen - ase_center_on_screen
-    
-        # Uusi maskikeskipiste
         mask_center = pygame.Vector2(w // 2, h // 2) + ase_to_player_offset
-    
-        # Piirrä maski (pelaajan etupuoli säilytetään näkyvänä)
         radians = math.radians(self.angle)
         direction = pygame.Vector2(math.cos(radians), math.sin(radians))
-    
         pygame.draw.polygon(mask, (255, 255, 255, 255), [
             mask_center,
             mask_center + direction.rotate(-90) * 1000,
             mask_center + direction * 1000,
             mask_center + direction.rotate(90) * 1000,
         ])
-    
-        # Käytä maskia aseeseen
         ase_surface.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-    
-        # Piirrä ase
+
         screen.blit(ase_surface, ase_rect)
         screen.blit(rotated_hattu, hattu_rect)
 
-        # --- Debug: hyökkäyksen alue näkyviin ---
+        # Debug-hyökkäysalue
         if self.is_attacking:
-            debug_length = 100  # Kuinka pitkälle eteenpäin
-            debug_width = 30   # Suorakulmion leveys
-
-            # Lasketaan suunta ja ortonormaali (leveyssuunta)
-            radians = math.radians(self.angle)
+            debug_length = 100
+            debug_width = 30
             direction = pygame.Vector2(math.cos(radians), math.sin(radians))
-            perpendicular = pygame.Vector2(-direction.y, direction.x)  # 90 astetta
-
-            # Suorakulmion kulmat
+            perpendicular = pygame.Vector2(-direction.y, direction.x)
             p1 = center + direction * (PLAYER_SIZE / 2) + perpendicular * (debug_width / 2)
             p2 = center + direction * (PLAYER_SIZE / 2) - perpendicular * (debug_width / 2)
             p3 = p2 + direction * debug_length
             p4 = p1 + direction * debug_length
-
-            # Piirrä läpinäkyvä punainen suorakulmio
             debug_surface = pygame.Surface((screen.get_width(), screen.get_height()), pygame.SRCALPHA)
             pygame.draw.polygon(debug_surface, (255, 0, 0, 100), [p1, p2, p3, p4])
             screen.blit(debug_surface, (0, 0))
