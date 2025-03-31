@@ -42,18 +42,22 @@ class Player:
         self.light_intensity = 1.0
 
     def set_lighting(self, light_positions, obstacles):
-        """Päivittää pelaajan valaistusarvon ympäröivien valojen perusteella"""
-        arvo = 0.0
+        """Päivittää pelaajan valaistusarvon ympäröivien valojen perusteella, sulavasti"""
+        target = 0.0
         point = pygame.Vector2(self.rect.center)
         for light_pos in light_positions:
             ray = Ray(point, 0, point.distance_to(light_pos))
             light_value = ray.cast_to_light(light_pos, obstacles)
             if light_value is not None:
-                arvo += light_value
-        arvo *= 3
-        arvo = min(arvo, 1.0)
-        arvo = max(arvo, 0.2)
-        self.light_intensity = arvo
+                target += light_value
+        target *= 3
+        target = min(target, 1.0)
+        target = max(target, 0.2)
+    
+        # Smooth transition: lineaarinen interpolaatio vanhasta uuteen
+        smoothing_speed = 0.1  # isompi arvo = nopeampi reagointi
+        self.light_intensity += (target - self.light_intensity) * smoothing_speed
+
 
     def move(self, keys, walls):
         dx = dy = 0
