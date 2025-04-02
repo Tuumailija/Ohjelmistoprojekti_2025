@@ -178,24 +178,6 @@ class Kliittyma:
         self.viholliset = self.luo_viholliset(game_map, 500)
         self.hud_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)  # HUD layer
 
-        # Etsitään viimeinen huone ja toinen huone ja sitten luodaan maali niiden kummankin keskelle (DEBUG neliön voi poistaa kun loppuvalikko valmis)
-        room_ids = sorted(set(cell for row in matrix for cell in row if cell != 0))
-        max_id = room_ids[-1]
-        second_id = room_ids[1] if len(room_ids) > 1 else room_ids[0]  # DEBUG (voi poistaa myöhemmin)
-
-        def huoneen_keskipiste(room_id):
-            huone = [(r, c) for r, row in enumerate(matrix) for c, id in enumerate(row) if id == room_id]
-            min_r = min(r for r, _ in huone)
-            max_r = max(r for r, _ in huone)
-            min_c = min(c for _, c in huone)
-            max_c = max(c for _, c in huone)
-            center_x_tile = ((min_c + max_c + 1) // 2) * CELL_WIDTH + 1 + ROOM_WIDTH // 2
-            center_y_tile = ((min_r + max_r + 1) // 2) * CELL_HEIGHT + 1 + ROOM_HEIGHT // 2
-            return pygame.Rect(center_x_tile * TILE_SIZE - 16, center_y_tile * TILE_SIZE - 16, 32, 32)
-
-        goal_rect = huoneen_keskipiste(max_id)
-        debug_rect = huoneen_keskipiste(second_id)  # DEBUG (voi poistaa myöhemmin)
-
         start_r, start_c = MATRIX_ROWS // 2, 0
         start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
         start_y = (start_r * CELL_HEIGHT + 1 + 8 // 2) * TILE_SIZE
