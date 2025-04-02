@@ -76,6 +76,15 @@ class RayCaster:
 
                 #pygame.draw.line(self.screen, (255, 255, 255), pos, point, 1)
 
+    def draw_falloff_circle(surface, center, max_radius, brightness):
+        for r in range(max_radius, 0, -1):
+            falloff = r / max_radius  # 1.0 (reuna) → 0.0 (keskusta)
+            alpha = int((1 - falloff**2) * brightness)
+            if alpha <= 0:
+                continue  # Ei piirretä näkymätöntä kerrosta
+            color = (brightness, brightness, brightness, alpha)
+            pygame.draw.circle(surface, color, center, r)
+
     def get_light_mask(self):
         width, height = self.screen.get_size()
         mask = pygame.Surface((width, height), pygame.SRCALPHA)
@@ -90,10 +99,12 @@ class RayCaster:
                 arvo = min(arvo, 1.0)
 
                 if arvo > 0:
-                    radius = 30
+                    radius = 35
                     brightness = int(arvo * 255)
-                    s = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
-                    pygame.draw.circle(s, (brightness, brightness, brightness, 255), (radius, radius), radius)
-                    mask.blit(s, (point[0] - radius, point[1] - radius), special_flags=pygame.BLEND_RGBA_ADD)
+                    if brightness < 8:
+                        continue  # jätetään hyvin himmeät pois
+                    s = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+                    RayCaster.draw_falloff_circle(s, (radius, radius), radius, brightness)
+                    mask.blit(s, (point[0] - radius, point[1] - radius))  # ilman blend-moodia
 
         return mask

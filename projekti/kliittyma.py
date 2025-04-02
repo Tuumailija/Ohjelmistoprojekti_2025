@@ -4,7 +4,7 @@ import random
 import sys
 import os
 from tile_kartta import Kartta
-from MapGen import Map, FLOOR, TILE_SIZE, WALL, CELL_WIDTH, CELL_HEIGHT
+from MapGen import Map, FLOOR, TILE_SIZE, WALL, CELL_WIDTH, CELL_HEIGHT, ROOM_WIDTH, ROOM_HEIGHT
 from player import Player
 from raycast import RayCaster
 from Vihollinen import Vihollinen
@@ -24,10 +24,11 @@ class Kliittyma:
 
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Peli")
-        self.clock = pygame.time.Clock()
         self.ray_caster = RayCaster(self.screen, PHYSICS_RENDER_DIST)
         self.game_running = False
         self.musiikki_soi = False
+
+        self.clock = pygame.time.Clock()
 
         self.viholliset = []
 
@@ -175,6 +176,25 @@ class Kliittyma:
         matrix = Kartta.generoi_tile_matriisi()
         game_map = Map(matrix)
         self.viholliset = self.luo_viholliset(game_map, 500)
+        self.hud_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)  # HUD layer
+
+        # Etsitään viimeinen huone ja toinen huone ja sitten luodaan maali niiden kummankin keskelle (DEBUG neliön voi poistaa kun loppuvalikko valmis)
+        room_ids = sorted(set(cell for row in matrix for cell in row if cell != 0))
+        max_id = room_ids[-1]
+        second_id = room_ids[1] if len(room_ids) > 1 else room_ids[0]  # DEBUG (voi poistaa myöhemmin)
+
+        def huoneen_keskipiste(room_id):
+            huone = [(r, c) for r, row in enumerate(matrix) for c, id in enumerate(row) if id == room_id]
+            min_r = min(r for r, _ in huone)
+            max_r = max(r for r, _ in huone)
+            min_c = min(c for _, c in huone)
+            max_c = max(c for _, c in huone)
+            center_x_tile = ((min_c + max_c + 1) // 2) * CELL_WIDTH + 1 + ROOM_WIDTH // 2
+            center_y_tile = ((min_r + max_r + 1) // 2) * CELL_HEIGHT + 1 + ROOM_HEIGHT // 2
+            return pygame.Rect(center_x_tile * TILE_SIZE - 16, center_y_tile * TILE_SIZE - 16, 32, 32)
+
+        goal_rect = huoneen_keskipiste(max_id)
+        debug_rect = huoneen_keskipiste(second_id)  # DEBUG (voi poistaa myöhemmin)
 
         start_r, start_c = MATRIX_ROWS // 2, 0
         start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
@@ -187,44 +207,47 @@ class Kliittyma:
                     pygame.quit()
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE: # ESC-näppäin pelin lopettamista varten
+                    if event.key == pygame.K_ESCAPE:
                         self.game_running = False
                         return
-                    elif event.key == pygame.K_e: # E-näppäin ovien avaamista varten
+                    elif event.key == pygame.K_e:
                         for door in game_map.doors:
                             if pygame.Vector2(player.rect.center).distance_to(pygame.Vector2(door.x, door.y)) < 64:
                                 door.toggle(self.kulma_pelaajan_ja_hiiren_valilla(player, 0, 0))
-
+                    elif event.key == pygame.K_q:
+                        self.hud_splatter()
+            
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    player.attack()
 
             doors_in_radius = [door.rect for door in game_map.doors if not door.is_open and pygame.Vector2(door.rect.center).distance_to(pygame.Vector2(player.rect.center)) < PHYSICS_RENDER_DIST]
             walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST) + doors_in_radius
+            
+            dt = self.clock.tick(60)
+            player.update(dt)
+            
             player.move(pygame.key.get_pressed(), walls)
 
             cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
             cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
             self.ray_caster.set_cam(cam_x, cam_y)
 
-            # Piirretään taustakuva (lattiatekstuuri)
+            # Piirretään tausta
             start_x_tile = - (cam_x % self.tile_width)
             start_y_tile = - (cam_y % self.tile_height)
             for x in range(start_x_tile, SCREEN_WIDTH, self.tile_width):
                 for y in range(start_y_tile, SCREEN_HEIGHT, self.tile_height):
                     self.screen.blit(self.background, (x, y))
-            
-            # Haetaan valaistusmaski ja piirretään tekstuurin päälle
+
             light_mask = self.ray_caster.get_light_mask()
             self.screen.blit(light_mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-
-
 
             #game_map.draw(self.screen, cam_x, cam_y)
 
             self.ray_caster.set_obstacles(walls)
             for wall in walls:
-                pygame.draw.rect(self.screen, (0, 0, 0), 
-                                 pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
+                pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
 
-            #Tarvittaessa suurennetaan
             lights = game_map.get_lights_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST*1.5)
             self.ray_caster.set_valot(lights)
 
@@ -232,12 +255,18 @@ class Kliittyma:
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y), angle)
             #self.ray_caster.draw((player.rect.centerx - cam_x, player.rect.centery - cam_y))
 
-            player.draw(self.screen, cam_x, cam_y, angle+90)
+            player.set_lighting(lights, walls)  # ← tämä ennen player.draw(...)
+            player.draw(self.screen, cam_x, cam_y, angle)
+
 
             for vihollinen in self.viholliset:
                 vihollinen.piirra(self.screen, cam_x, cam_y)
 
+            """self.hud_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)  # HUD layer
+            pygame.draw.rect(self.hud_surface, (255, 0, 0), (0, 0, SCREEN_WIDTH-20, SCREEN_HEIGHT-20), 20)  # Semi-transparent bar
+            self.screen.blit(self.hud_surface, (0, 0))  # Draw HUD surface"""
 
+            self.screen.blit(self.hud_surface, (0, 0))  # Draw HUD surface
             pygame.display.flip()
 
     def kulma_pelaajan_ja_hiiren_valilla(self, player, cam_x, cam_y):
@@ -249,3 +278,7 @@ class Kliittyma:
         dy = mouse_y - player_y
         angle = math.degrees(math.atan2(dy, dx))
         return angle
+
+    def hud_splatter(self):
+        borderwidth = 50
+        pygame.draw.rect(self.hud_surface, (255, 0, 0), (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), borderwidth) # punainen ruutu
