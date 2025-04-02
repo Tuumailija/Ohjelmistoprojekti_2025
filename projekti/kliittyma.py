@@ -166,7 +166,6 @@ class Kliittyma:
         self.viholliset = self.luo_viholliset(game_map, 500)
         #veriläiskä taso
         self.player_splatter_layer = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        self.show_verilaiska = False
         self.pyyhipois = 0
         start_r, start_c = MATRIX_ROWS // 2, 0
         start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
@@ -248,7 +247,6 @@ class Kliittyma:
         return angle
 
     def hud_splatter(self):
-        self.show_verilaiska = True
         self.pyyhipois = self.current_time+2000
         borderwidth = 0
 
@@ -262,11 +260,8 @@ class Kliittyma:
     
     def draw_ui(self):
 
-
         #laske 2 sekuntia, sitten laita self.show_verilaiska = False
         if self.current_time > self.pyyhipois:
-            self.show_verilaiska = False
             self.player_splatter_layer = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-
-        if self.show_verilaiska:
+        else:
             self.screen.blit(self.player_splatter_layer, (0, 0))
