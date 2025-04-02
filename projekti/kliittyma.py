@@ -3,6 +3,7 @@ import pygame
 import random
 import sys
 import os
+import time
 from tile_kartta import Kartta
 from MapGen import Map, FLOOR, TILE_SIZE, WALL, CELL_WIDTH, CELL_HEIGHT
 from player import Player
@@ -163,28 +164,39 @@ class Kliittyma:
         matrix = Kartta.generoi_tile_matriisi()
         game_map = Map(matrix)
         self.viholliset = self.luo_viholliset(game_map, 500)
-        self.hud_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        #veriläiskä taso
+        self.player_splatter_layer = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self.show_verilaiska = False
+        self.pyyhipois = 0
         start_r, start_c = MATRIX_ROWS // 2, 0
         start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
         start_y = (start_r * CELL_HEIGHT + 1 + 8 // 2) * TILE_SIZE
         player = Player(start_x, start_y)
+
         while self.game_running:
+            self.current_time = pygame.time.get_ticks()
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.game_running = False
                         return
+                    
                     elif event.key == pygame.K_e:
                         for door in game_map.doors:
                             if pygame.Vector2(player.rect.center).distance_to(pygame.Vector2(door.rect.center)) < 64:
                                 door.toggle(self.kulma_pelaajan_ja_hiiren_valilla(player, 0, 0))
+                    #debug veri
                     elif event.key == pygame.K_q:
                         self.hud_splatter()
+
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     player.attack()
+
             doors_in_radius = [door.rect for door in game_map.doors if not door.is_open and pygame.Vector2(door.rect.center).distance_to(pygame.Vector2(player.rect.center)) < PHYSICS_RENDER_DIST]
             walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST) + doors_in_radius
             dt = self.clock.tick(60)
@@ -195,26 +207,34 @@ class Kliittyma:
             self.ray_caster.set_cam(cam_x, cam_y)
             start_x_tile = - (cam_x % self.tile_width)
             start_y_tile = - (cam_y % self.tile_height)
+
             for x in range(start_x_tile, SCREEN_WIDTH, self.tile_width):
                 for y in range(start_y_tile, SCREEN_HEIGHT, self.tile_height):
                     self.screen.blit(self.background, (x, y))
+
             light_mask = self.ray_caster.get_light_mask()
             self.screen.blit(light_mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
             self.ray_caster.set_obstacles(walls)
+
             for wall in walls:
                 pygame.draw.rect(self.screen, (0, 0, 0), 
                                  pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
+                
             lights = game_map.get_lights_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST * 1.5)
             self.ray_caster.set_valot(lights)
             angle = self.kulma_pelaajan_ja_hiiren_valilla(player, cam_x, cam_y)
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y), angle)
             player.draw(self.screen, cam_x, cam_y, angle)
+
             # Päivitetään viholliset, huomioiden törmäykset sekä pelaajaan
             for vihollinen in self.viholliset:
                 vihollinen.update(walls, self.viholliset, player)
             for vihollinen in self.viholliset:
                 vihollinen.piirra(self.screen, cam_x, cam_y)
-            self.screen.blit(self.hud_surface, (0, 0))
+
+            #piirrä ui elementit
+            self.draw_ui() 
+
             pygame.display.flip()
 
     def kulma_pelaajan_ja_hiiren_valilla(self, player, cam_x, cam_y):
@@ -228,5 +248,25 @@ class Kliittyma:
         return angle
 
     def hud_splatter(self):
-        borderwidth = 50
-        pygame.draw.rect(self.hud_surface, (255, 0, 0), (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), borderwidth)
+        self.show_verilaiska = True
+        self.pyyhipois = self.current_time+2000
+        borderwidth = 0
+
+        for _ in range(5):
+            #satunnainen x,y ruudulla
+            x = random.randint(0, SCREEN_WIDTH - 1)
+            y = random.randint(0, SCREEN_HEIGHT - 1)
+
+            #luo 50x50 punainen loota
+            pygame.draw.rect(self.player_splatter_layer, (255, 0, 0), (x, y, 50, 50), borderwidth)
+    
+    def draw_ui(self):
+
+
+        #laske 2 sekuntia, sitten laita self.show_verilaiska = False
+        if self.current_time > self.pyyhipois:
+            self.show_verilaiska = False
+            self.player_splatter_layer = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+
+        if self.show_verilaiska:
+            self.screen.blit(self.player_splatter_layer, (0, 0))
