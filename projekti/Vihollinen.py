@@ -24,13 +24,15 @@ class Vihollinen:
         self.rect = pygame.Rect(self.x, self.y, self.leveys, self.pituus)
         
         # Aseta viholliselle liikkumisnopeus ja satunnainen alkuperäinen liikesuunta
-        self.speed = 2  #Vihollisen vauhti
+        self.speed = 2  # Vihollisen vauhti
         self.direction = pygame.Vector2(random.choice([-1, 1]), random.choice([-1, 1])).normalize()
         self.frame_counter = 0
         self.change_direction_time = random.randint(30, 120)  # satunnaisia ruudun päivityksiä ennen suunnan vaihtoa
 
-    def update(self, walls):
-        """Päivittää vihollisen sijainnin ja tarkistaa törmäykset."""
+    def update(self, walls, enemies, player):
+        """Päivittää vihollisen sijainnin ja tarkistaa törmäykset.
+           Jos vihollinen törmää seinään, toiseen viholliseen tai pelaajaan, liike peruutetaan
+           ja suunnaksi asetetaan uusi satunnainen vektori."""
         self.frame_counter += 1
         if self.frame_counter >= self.change_direction_time:
             # Vaihdetaan satunnainen suunta
@@ -44,13 +46,26 @@ class Vihollinen:
         self.rect.x += int(self.direction.x * self.speed)
         self.rect.y += int(self.direction.y * self.speed)
         
-        # Tarkistetaan törmäykset annettujen "wall"-elementtien kanssa
+        # Tarkistetaan törmäykset seinien kanssa
         for wall in walls:
             if self.rect.colliderect(wall):
                 self.rect = old_rect  # Palautetaan edellinen sijainti
-                # Vaihdetaan suuntaa törmäyksen jälkeen
                 self.direction = pygame.Vector2(random.choice([-1, 1]), random.choice([-1, 1])).normalize()
-                break
+                return
+
+        # Tarkistetaan törmäykset muiden vihollisten kanssa
+        for enemy in enemies:
+            if enemy is not self and self.rect.colliderect(enemy.rect):
+                self.rect = old_rect
+                self.direction = pygame.Vector2(random.choice([-1, 1]), random.choice([-1, 1])).normalize()
+                return
+
+        # Tarkistetaan törmäys pelaajaan
+        if self.rect.colliderect(player.rect):
+            self.rect = old_rect
+            self.direction = pygame.Vector2(random.choice([-1, 1]), random.choice([-1, 1])).normalize()
+            # Tässä voidaan lisätä logiikkaa, esim. pelaajan vahingoittaminen
+            return
 
     def piirra(self, screen, cam_x, cam_y):
         if self.sprite:
