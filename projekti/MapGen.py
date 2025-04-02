@@ -21,6 +21,8 @@ class Map:
         self.map_width_px = len(self.tilemap[0]) * TILE_SIZE
         self.map_height_px = len(self.tilemap) * TILE_SIZE
         self.room_balls = self.generate_room_balls()
+        self.win_tile = self.get_win_tile()
+        self.debug_tile = self.get_debug_tile()
 
     def build_global_tilemap(self):
         rows, cols = len(self.matrix), len(self.matrix[0])
@@ -168,6 +170,33 @@ class Map:
                 y = room_bottom - ball_offset
             balls.append((x, y))
         return balls
+    
+    def get_win_tile(self):
+        last_room_id = max(r for row in self.matrix for r in row)
+        cells = [(r, c) for r in range(len(self.matrix)) for c in range(len(self.matrix[0])) if self.matrix[r][c] == last_room_id]
+        min_r = min(r for r, c in cells)
+        max_r = max(r for r, c in cells)
+        min_c = min(c for r, c in cells)
+        max_c = max(c for r, c in cells)
+        center_x = ((min_c + max_c + 1) / 2) * CELL_WIDTH * TILE_SIZE
+        center_y = ((min_r + max_r + 1) / 2) * CELL_HEIGHT * TILE_SIZE
+        size = TILE_SIZE
+        return pygame.Rect(center_x - size // 2, center_y - size // 2, size, size)
+    
+    def get_debug_tile(self):  # DEBUG (voi poistaa myöhemmin)
+        room_ids = sorted(set(r for row in self.matrix for r in row if r != 0))  # DEBUG
+        if len(room_ids) < 2:  # DEBUG
+            return pygame.Rect(0, 0, TILE_SIZE, TILE_SIZE)  # DEBUG
+        debug_id = room_ids[1]  # DEBUG
+        cells = [(r, c) for r in range(len(self.matrix)) for c in range(len(self.matrix[0])) if self.matrix[r][c] == debug_id]  # DEBUG
+        min_r = min(r for r, c in cells)  # DEBUG
+        max_r = max(r for r, c in cells)  # DEBUG
+        min_c = min(c for r, c in cells)  # DEBUG
+        max_c = max(c for r, c in cells)  # DEBUG
+        center_x = ((min_c + max_c + 1) / 2) * CELL_WIDTH * TILE_SIZE  # DEBUG
+        center_y = ((min_r + max_r + 1) / 2) * CELL_HEIGHT * TILE_SIZE  # DEBUG
+        size = TILE_SIZE  # DEBUG
+        return pygame.Rect(center_x - size // 2, center_y - size // 2, size, size)  # DEBUG
 
     def draw(self, screen, cam_x, cam_y):
         for wall in self.wall_rects:
