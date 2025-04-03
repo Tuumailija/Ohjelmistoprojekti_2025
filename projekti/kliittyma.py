@@ -32,7 +32,7 @@ class Kliittyma:
 
         self.viholliset = []
 
-        taustakuva = os.path.join(os.getcwd(),"projekti", "media", "Img", "StoneFloorTexture.png")
+        taustakuva = os.path.join(os.getcwd(),"projekti", "media", "Img", "WoodFloorTexture.jpg")
         if os.path.exists(taustakuva):
             self.background = pygame.image.load(taustakuva).convert()
             self.tile_width = self.background.get_width()
