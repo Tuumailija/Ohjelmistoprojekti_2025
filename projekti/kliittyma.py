@@ -10,6 +10,7 @@ from player import Player
 from raycast import RayCaster
 from Vihollinen import Vihollinen
 from ovi import Door
+from hud import *
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1080
 CELL_WIDTH, CELL_HEIGHT, TILE_SIZE = 11, 9, 64
@@ -164,9 +165,7 @@ class Kliittyma:
         matrix = Kartta.generoi_tile_matriisi()
         game_map = Map(matrix)
         self.viholliset = self.luo_viholliset(game_map, 500)
-        #veriläiskä taso
-        self.player_splatter_layer = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        self.pyyhipois = 0
+        hud = gamehud(self.screen, SCREEN_WIDTH, SCREEN_HEIGHT)
         start_r, start_c = MATRIX_ROWS // 2, 0
         start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
         start_y = (start_r * CELL_HEIGHT + 1 + 8 // 2) * TILE_SIZE
@@ -193,7 +192,10 @@ class Kliittyma:
                                 door.toggle(self.kulma_pelaajan_ja_hiiren_valilla(player, 0, 0))
                     #debug veri
                     elif event.key == pygame.K_q:
-                        self.hud_splatter()
+                        hud.hud_splatter(SCREEN_WIDTH, SCREEN_HEIGHT, self.current_time)
+                    #debug redden
+                    elif event.key == pygame.K_c:
+                        hud.hud_redden()#, SCREEN_WIDTH, SCREEN_HEIGHT)
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     player.attack()
@@ -258,7 +260,7 @@ class Kliittyma:
                 return
             
             #piirrä ui elementit
-            self.draw_ui() 
+            hud.draw_hud(SCREEN_WIDTH, SCREEN_HEIGHT, self.current_time)
 
             pygame.display.flip()
 
@@ -271,23 +273,3 @@ class Kliittyma:
         dy = mouse_y - player_y
         angle = math.degrees(math.atan2(dy, dx))
         return angle
-
-    def hud_splatter(self):
-        self.pyyhipois = self.current_time+2000
-        borderwidth = 0
-
-        for _ in range(5):
-            #satunnainen x,y ruudulla
-            x = random.randint(0, SCREEN_WIDTH - 1)
-            y = random.randint(0, SCREEN_HEIGHT - 1)
-
-            #luo 50x50 punainen loota
-            pygame.draw.rect(self.player_splatter_layer, (255, 0, 0), (x, y, 50, 50), borderwidth)
-    
-    def draw_ui(self):
-
-        #laske 2 sekuntia, sitten laita self.show_verilaiska = False
-        if self.current_time > self.pyyhipois:
-            self.player_splatter_layer = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        else:
-            self.screen.blit(self.player_splatter_layer, (0, 0))
