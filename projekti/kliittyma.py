@@ -5,7 +5,7 @@ import sys
 import os
 import time
 from tile_kartta import Kartta
-from MapGen import Map, FLOOR, TILE_SIZE, WALL, CELL_WIDTH, CELL_HEIGHT
+from MapGen import Map, FLOOR, TILE_SIZE, WALL, CELL_WIDTH, CELL_HEIGHT, ROOM_WIDTH, ROOM_HEIGHT
 from player import Player
 from raycast import RayCaster
 from Vihollinen import Vihollinen
@@ -172,6 +172,8 @@ class Kliittyma:
         start_y = (start_r * CELL_HEIGHT + 1 + 8 // 2) * TILE_SIZE
         player = Player(start_x, start_y)
 
+        debug_tile = game_map.get_debug_tile()  # DEBUG
+
         while self.game_running:
             self.current_time = pygame.time.get_ticks()
 
@@ -201,8 +203,8 @@ class Kliittyma:
             dt = self.clock.tick(60)
             player.update(dt)
             player.move(pygame.key.get_pressed(), walls)
-            cam_x = max(0, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
-            cam_y = max(0, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
+            cam_x = max(-SCREEN_WIDTH // 2, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
+            cam_y = max(-SCREEN_HEIGHT // 2, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
             self.ray_caster.set_cam(cam_x, cam_y)
             start_x_tile = - (cam_x % self.tile_width)
             start_y_tile = - (cam_y % self.tile_height)
@@ -233,6 +235,28 @@ class Kliittyma:
             for vihollinen in self.viholliset:
                 vihollinen.piirra(self.screen, cam_x, cam_y)
 
+            """self.hud_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)  # HUD layer
+            pygame.draw.rect(self.hud_surface, (255, 0, 0), (0, 0, SCREEN_WIDTH-20, SCREEN_HEIGHT-20), 20)  # Semi-transparent bar
+            self.screen.blit(self.hud_surface, (0, 0))  # Draw HUD surface"""
+
+            # self.screen.blit(self.hud_surface, (0, 0))  # Draw HUD surface
+
+            pygame.draw.rect(self.screen, (255, 255, 0), pygame.Rect(game_map.win_tile.x - cam_x, game_map.win_tile.y - cam_y, game_map.win_tile.width, game_map.win_tile.height))
+
+            # DEBUG: piirrä debug-tile
+            pygame.draw.rect(self.screen, (255, 165, 0), pygame.Rect(debug_tile.x - cam_x, debug_tile.y - cam_y, debug_tile.width, debug_tile.height))  # DEBUG
+ 
+            # DEBUG: lopeta peli jos pelaaja osuu debug-ruutuun
+            if player.rect.colliderect(debug_tile):  # DEBUG
+                print("DEBUG: osuma toisen huoneen laatikkoon")  # DEBUG
+                self.game_running = False  # DEBUG
+                return  # DEBUG
+ 
+            if player.rect.colliderect(game_map.win_tile):
+                print("Voitit pelin!")
+                self.game_running = False
+                return
+            
             #piirrä ui elementit
             self.draw_ui() 
 
