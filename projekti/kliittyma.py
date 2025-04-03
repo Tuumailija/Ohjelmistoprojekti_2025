@@ -223,6 +223,8 @@ class Kliittyma:
             self.ray_caster.set_valot(lights)
             angle = self.kulma_pelaajan_ja_hiiren_valilla(player, cam_x, cam_y)
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y), angle)
+
+            player.set_lighting(lights, walls)
             player.draw(self.screen, cam_x, cam_y, angle)
 
             # Päivitetään viholliset, huomioiden törmäykset sekä pelaajaan
