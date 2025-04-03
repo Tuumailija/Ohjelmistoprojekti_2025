@@ -192,10 +192,11 @@ class Kliittyma:
                                 door.toggle(self.kulma_pelaajan_ja_hiiren_valilla(player, 0, 0))
                     #debug veri
                     elif event.key == pygame.K_q:
-                        hud.hud_splatter(SCREEN_WIDTH, SCREEN_HEIGHT, self.current_time)
+                        hud.splatter(self.current_time)
                     #debug redden
                     elif event.key == pygame.K_c:
-                        hud.hud_redden()#, SCREEN_WIDTH, SCREEN_HEIGHT)
+                        hud.redden(player.hp)
+                        player.hp -= 10
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     player.attack()
@@ -260,7 +261,7 @@ class Kliittyma:
                 return
             
             #piirrä ui elementit
-            hud.draw_hud(SCREEN_WIDTH, SCREEN_HEIGHT, self.current_time)
+            hud.draw(self.current_time)
 
             pygame.display.flip()
 

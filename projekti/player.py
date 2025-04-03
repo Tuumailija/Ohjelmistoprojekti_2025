@@ -33,6 +33,7 @@ class Player:
             self.ase_image = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE), pygame.SRCALPHA)
             pygame.draw.rect(self.ase_image, (255, 0, 0), self.ase_image.get_rect())
 
+        self.hp = 100
         self.is_attacking = False
         self.attack_timer = 0
         self.attack_duration = 200
