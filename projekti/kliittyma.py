@@ -19,6 +19,8 @@ PHYSICS_RENDER_DIST = 1000
 
 # Määritellään projektin peruspolku (kuvia ja musiikkia varten)
 project_dir = os.path.dirname(os.path.abspath(__file__))
+# Lisäkkää tää kun käytätte jotain media kansiosta niin toimii kaikilla koneilla T. Markus
+# katokkaa mallia musiikista ja taustakuvasta miten.
 
 
 class Kliittyma:
@@ -37,7 +39,7 @@ class Kliittyma:
 
         self.viholliset = []
 
-        taustakuva = os.path.join(os.getcwd(),"projekti", "media", "Img", "WoodFloorTexture.jpg")
+        taustakuva = os.path.join(project_dir, "media", "Img", "WoodFloorTexture.jpg")
         if os.path.exists(taustakuva):
             self.background = pygame.image.load(taustakuva).convert()
             self.tile_width = self.background.get_width()
