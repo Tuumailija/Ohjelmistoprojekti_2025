@@ -17,6 +17,10 @@ CELL_WIDTH, CELL_HEIGHT, TILE_SIZE = 11, 9, 64
 MATRIX_ROWS, MATRIX_COLS = Kartta.korkeus, Kartta.pituus
 PHYSICS_RENDER_DIST = 1000
 
+# Määritellään projektin peruspolku (kuvia ja musiikkia varten)
+project_dir = os.path.dirname(os.path.abspath(__file__))
+
+
 class Kliittyma:
     def __init__(self):
         pygame.init()
@@ -46,11 +50,9 @@ class Kliittyma:
             self.background.fill((100, 100, 100))  # Lataa harmaan lattian
 
     def valikko_musiikki(self):
-        base_dir = os.path.dirname(__file__)
-        musiikki_polku = os.path.join(base_dir,"projekti", "media", "Aloitusmusiikki.mp3")
+        musiikki_polku = os.path.join(project_dir, "media", "Aloitusmusiikki.mp3")
         if os.path.exists(musiikki_polku):
             print(f"Ladataan musiikkia: {musiikki_polku}")
-            pygame.mixer.init()
             pygame.mixer.music.load(musiikki_polku)
             pygame.mixer.music.set_volume(1.0)
             pygame.mixer.music.play(-1)
@@ -65,15 +67,14 @@ class Kliittyma:
 
     def peli_musiikki(self):
         musiikin_polku = [
-            os.path.join(os.getcwd(),"projekti", "media", "Taustamusiikki.mp3"),
-            os.path.join(os.getcwd(),"projekti", "media", "Taustamusiikki2.mp3"),
-            os.path.join(os.getcwd(),"projekti", "media", "Taustamusiikki3.mp3"),
-            os.path.join(os.getcwd(),"projekti", "media", "Taustamusiikki4.mp3"),
+            os.path.join(project_dir, "media", "Taustamusiikki.mp3"),
+            os.path.join(project_dir, "media", "Taustamusiikki2.mp3"),
+            os.path.join(project_dir, "media", "Taustamusiikki3.mp3"),
+            os.path.join(project_dir, "media", "Taustamusiikki4.mp3"),
         ]
         musiikki = random.choice(musiikin_polku)
         if os.path.exists(musiikki):
             print(f"Ladataan musiikkia: {musiikki}")
-            pygame.mixer.init()
             pygame.mixer.music.load(musiikki)
             pygame.mixer.music.set_volume(1.0)
             pygame.mixer.music.play()
@@ -81,6 +82,7 @@ class Kliittyma:
             print(f"Taustamusiikkia ei löytynyt polusta: {musiikki}")
 
     def run(self):
+        self.valikko_musiikki()
         self.screen.fill((0, 0, 0))
         self.piirra_valikko()
 
@@ -161,6 +163,10 @@ class Kliittyma:
         return viholliset
 
     def kaynnista_peli(self):
+        # Lopetetaan valikkos musiikki ja aloitetaan pelimusiikki
+        self.lopeta_valikko_musiikki()
+        self.peli_musiikki()
+
         self.game_running = True
         matrix = Kartta.generoi_tile_matriisi()
         game_map = Map(matrix)
