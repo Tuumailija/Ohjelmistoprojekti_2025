@@ -8,7 +8,6 @@ from tile_kartta import Kartta
 from MapGen import Map, FLOOR, TILE_SIZE, WALL, CELL_WIDTH, CELL_HEIGHT, ROOM_WIDTH, ROOM_HEIGHT
 from player import Player
 from raycast import RayCaster
-from Vihollinen import Vihollinen
 from ovi import Door
 from hud import *
 
@@ -36,8 +35,6 @@ class Kliittyma:
         self.musiikki_soi = False
 
         self.clock = pygame.time.Clock()
-
-        self.viholliset = []
 
         taustakuva = os.path.join(project_dir, "media", "Img", "WoodFloorTexture.jpg")
         if os.path.exists(taustakuva):
@@ -137,33 +134,6 @@ class Kliittyma:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     return
 
-    def luo_viholliset(self, game_map, maara=500):
-        viholliset = []
-        vapaat_ruudut = []
-        rows = len(game_map.tilemap)
-        cols = len(game_map.tilemap[0])
-        for y in range(1, rows - 1):
-            for x in range(1, cols - 1):
-                if game_map.tilemap[y][x] == FLOOR:
-                    if (game_map.tilemap[y-1][x] == FLOOR and 
-                        game_map.tilemap[y+1][x] == FLOOR and 
-                        game_map.tilemap[y][x-1] == FLOOR and 
-                        game_map.tilemap[y][x+1] == FLOOR):
-                        vapaat_ruudut.append((x, y))
-        print("Löydetty vapaita ruutuja:", len(vapaat_ruudut))
-    
-        if not vapaat_ruudut:
-            print("Ei vapaita ruutuja, käytetään kaikkia lattiaruutuja")
-            vapaat_ruudut = [(x, y) for y in range(rows) for x in range(cols) if game_map.tilemap[y][x] == FLOOR]
-
-        for _ in range(maara):
-            x, y = random.choice(vapaat_ruudut)
-            enemy_x = x * TILE_SIZE + TILE_SIZE // 2 - 20
-            enemy_y = y * TILE_SIZE + TILE_SIZE // 2 - 20
-            viholliset.append(Vihollinen(enemy_x, enemy_y))
-        print("Luodaan vihollisia:", len(viholliset))
-        return viholliset
-
     def kaynnista_peli(self):
         # Lopetetaan valikkos musiikki ja aloitetaan pelimusiikki
         self.lopeta_valikko_musiikki()
@@ -172,7 +142,6 @@ class Kliittyma:
         self.game_running = True
         matrix = Kartta.generoi_tile_matriisi()
         game_map = Map(matrix)
-        self.viholliset = self.luo_viholliset(game_map, 500)
         hud = gamehud(self.screen, SCREEN_WIDTH, SCREEN_HEIGHT)
         start_r, start_c = MATRIX_ROWS // 2, 0
         start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
@@ -224,8 +193,20 @@ class Kliittyma:
                 for y in range(start_y_tile, SCREEN_HEIGHT, self.tile_height):
                     self.screen.blit(self.background, (x, y))
 
-            light_mask = self.ray_caster.get_light_mask()
-            self.screen.blit(light_mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+            ## DEBUG ####################################################################
+            keys = pygame.key.get_pressed()
+            if not hasattr(self, 'skip_lighting'):
+                self.skip_lighting = False
+
+            if keys[pygame.K_1]:
+                self.skip_lighting = not self.skip_lighting
+                pygame.time.wait(200)  # Prevent rapid toggling
+
+            if not self.skip_lighting:
+                light_mask = self.ray_caster.get_light_mask()
+                self.screen.blit(light_mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+            ##############################################################################
+
             self.ray_caster.set_obstacles(walls)
 
             for wall in walls:
@@ -233,18 +214,13 @@ class Kliittyma:
                                  pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
                 
             lights = game_map.get_lights_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST * 1.5)
-            self.ray_caster.set_valot(lights)
             angle = self.kulma_pelaajan_ja_hiiren_valilla(player, cam_x, cam_y)
+            
+            self.ray_caster.set_valot(lights)
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y), angle)
 
             player.set_lighting(lights, walls)
             player.draw(self.screen, cam_x, cam_y, angle)
-
-            # Päivitetään viholliset, huomioiden törmäykset sekä pelaajaan
-            for vihollinen in self.viholliset:
-                vihollinen.update(walls, self.viholliset, player)
-            for vihollinen in self.viholliset:
-                vihollinen.piirra(self.screen, cam_x, cam_y)
 
             """self.hud_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)  # HUD layer
             pygame.draw.rect(self.hud_surface, (255, 0, 0), (0, 0, SCREEN_WIDTH-20, SCREEN_HEIGHT-20), 20)  # Semi-transparent bar
