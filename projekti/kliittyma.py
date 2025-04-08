@@ -10,6 +10,7 @@ from player import Player
 from raycast import RayCaster
 from ovi import Door
 from hud import *
+from Vihollinen import Vihollinen
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1080
 CELL_WIDTH, CELL_HEIGHT, TILE_SIZE = 11, 9, 64
@@ -135,7 +136,7 @@ class Kliittyma:
                     return
 
     def kaynnista_peli(self):
-        # Lopetetaan valikkos musiikki ja aloitetaan pelimusiikki
+        # Lopetetaan valikkos-musiikki ja aloitetaan pelimusiikki
         self.lopeta_valikko_musiikki()
         self.peli_musiikki()
 
@@ -150,103 +151,131 @@ class Kliittyma:
 
         debug_tile = game_map.get_debug_tile()  # DEBUG
 
+        # Lista vihollisille ja parametrit spawnausta ja despawnausta varten
+        enemies = []
+        MAX_ENEMIES = 10
+        SPAWN_INTERVAL = 3000         # Spawnataan uusi vihollinen x ms välein
+        DESPAWN_DISTANCE = 1500       # Jos vihollinen on yli x pikselin päässä pelaajasta, se poistetaan
+        spawn_timer = pygame.time.get_ticks()
+
         while self.game_running:
             self.current_time = pygame.time.get_ticks()
+            dt = self.clock.tick(60)
 
+            # Tapahtumakäsittely
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.game_running = False
                         return
-                    
                     elif event.key == pygame.K_e:
                         for door in game_map.doors:
                             if pygame.Vector2(player.rect.center).distance_to(pygame.Vector2(door.rect.center)) < 64:
                                 door.toggle(self.kulma_pelaajan_ja_hiiren_valilla(player, 0, 0))
-                    #debug veri
+                    # Debug-toimintoja
                     elif event.key == pygame.K_q:
                         hud.splatter(self.current_time)
-                    #debug redden
                     elif event.key == pygame.K_c:
                         hud.redden(player.hp)
                         player.hp -= 10
-
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     player.attack()
 
-            doors_in_radius = [door.rect for door in game_map.doors if not door.is_open and pygame.Vector2(door.rect.center).distance_to(pygame.Vector2(player.rect.center)) < PHYSICS_RENDER_DIST]
+            # Hae esteet (seinät + ovet) pelaajaa ympäriltä
+            doors_in_radius = [door.rect for door in game_map.doors 
+                                if not door.is_open and pygame.Vector2(door.rect.center).distance_to(pygame.Vector2(player.rect.center)) < PHYSICS_RENDER_DIST]
             walls = game_map.get_walls_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST) + doors_in_radius
-            dt = self.clock.tick(60)
+
+            # Päivitetään pelaaja ja liikutaan
             player.update(dt)
             player.move(pygame.key.get_pressed(), walls)
+
+            # Kameran asetukset
             cam_x = max(-SCREEN_WIDTH // 2, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
             cam_y = max(-SCREEN_HEIGHT // 2, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
             self.ray_caster.set_cam(cam_x, cam_y)
-            start_x_tile = - (cam_x % self.tile_width)
-            start_y_tile = - (cam_y % self.tile_height)
 
+            # Piirretään taustakuva laattoina
+            start_x_tile = -(cam_x % self.tile_width)
+            start_y_tile = -(cam_y % self.tile_height)
             for x in range(start_x_tile, SCREEN_WIDTH, self.tile_width):
                 for y in range(start_y_tile, SCREEN_HEIGHT, self.tile_height):
                     self.screen.blit(self.background, (x, y))
 
-            ## DEBUG ####################################################################
+            # Käsitellään valaistuksen togglaus
             keys = pygame.key.get_pressed()
             if not hasattr(self, 'skip_lighting'):
                 self.skip_lighting = False
-
             if keys[pygame.K_1]:
                 self.skip_lighting = not self.skip_lighting
-                pygame.time.wait(200)  # Prevent rapid toggling
-
+                pygame.time.wait(200)
             if not self.skip_lighting:
                 light_mask = self.ray_caster.get_light_mask()
                 self.screen.blit(light_mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-            ##############################################################################
 
+            # Päivitetään esteet säteiden laskentaa varten
             self.ray_caster.set_obstacles(walls)
-
             for wall in walls:
                 pygame.draw.rect(self.screen, (0, 0, 0), 
-                                 pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
-                
+                                pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
+
+            # Päivitetään ja piirretään valot
             lights = game_map.get_lights_in_radius(player.rect.centerx, player.rect.centery, PHYSICS_RENDER_DIST * 1.5)
             angle = self.kulma_pelaajan_ja_hiiren_valilla(player, cam_x, cam_y)
-            
             self.ray_caster.set_valot(lights)
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y), angle)
-
             player.set_lighting(lights, walls)
             player.draw(self.screen, cam_x, cam_y, angle)
 
-            """self.hud_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)  # HUD layer
-            pygame.draw.rect(self.hud_surface, (255, 0, 0), (0, 0, SCREEN_WIDTH-20, SCREEN_HEIGHT-20), 20)  # Semi-transparent bar
-            self.screen.blit(self.hud_surface, (0, 0))  # Draw HUD surface"""
+            # Piirretään voittoruutu ja debug-ruutu
+            pygame.draw.rect(self.screen, (255, 255, 0), 
+                            pygame.Rect(game_map.win_tile.x - cam_x, game_map.win_tile.y - cam_y, game_map.win_tile.width, game_map.win_tile.height))
+            pygame.draw.rect(self.screen, (255, 165, 0), 
+                            pygame.Rect(debug_tile.x - cam_x, debug_tile.y - cam_y, debug_tile.width, debug_tile.height))
 
-            # self.screen.blit(self.hud_surface, (0, 0))  # Draw HUD surface
-
-            pygame.draw.rect(self.screen, (255, 255, 0), pygame.Rect(game_map.win_tile.x - cam_x, game_map.win_tile.y - cam_y, game_map.win_tile.width, game_map.win_tile.height))
-
-            # DEBUG: piirrä debug-tile
-            pygame.draw.rect(self.screen, (255, 165, 0), pygame.Rect(debug_tile.x - cam_x, debug_tile.y - cam_y, debug_tile.width, debug_tile.height))  # DEBUG
- 
-            # DEBUG: lopeta peli jos pelaaja osuu debug-ruutuun
-            if player.rect.colliderect(debug_tile):  # DEBUG
-                print("DEBUG: osuma toisen huoneen laatikkoon")  # DEBUG
-                self.game_running = False  # DEBUG
-                return  # DEBUG
- 
+            # Tarkistetaan, osuuko pelaaja debug-ruutuun tai voittoruudulle
+            if player.rect.colliderect(debug_tile):
+                print("DEBUG: osuma toisen huoneen laatikkoon")
+                self.game_running = False
+                return
             if player.rect.colliderect(game_map.win_tile):
                 print("Voitit pelin!")
                 self.game_running = False
                 return
-            
-            #piirrä ui elementit
-            hud.draw(self.current_time)
 
+            # Vihollisten spawnaus: spawnataan uusi vihollinen, jos aikaväli on umpeutunut ja alle maksimi määrä
+            if self.current_time - spawn_timer > SPAWN_INTERVAL and len(enemies) < MAX_ENEMIES:
+                # Selvitä pelaajan huone
+                player_row = player.rect.centery // (CELL_HEIGHT * TILE_SIZE)
+                player_col = player.rect.centerx // (CELL_WIDTH * TILE_SIZE)
+                player_room_id = matrix[player_row][player_col]
+
+                # Käytetään tarkkaa huone-ID -> keskipiste sanakirjaa
+                room_center_dict = game_map.get_room_center_dict()
+
+                valid_spawn_points = [
+                    center for room_id, center in room_center_dict.items()
+                    if room_id != player_room_id and pygame.Vector2(center).distance_to(player.rect.center) < DESPAWN_DISTANCE
+                ]
+
+                if valid_spawn_points:
+                    spawn_pos = random.choice(valid_spawn_points)
+                    enemies.append(Vihollinen(spawn_pos[0], spawn_pos[1]))
+                spawn_timer = self.current_time
+
+            # Päivitetään ja piirretään viholliset sekä tarkistetaan despawn-olosuhteet
+            for enemy in enemies[:]:
+                if pygame.math.Vector2(enemy.rect.center).distance_to(player.rect.center) > DESPAWN_DISTANCE:
+                    enemies.remove(enemy)
+                else:
+                    enemy.update(dt)
+                    enemy.draw(self.screen, cam_x, cam_y)
+
+            # Piirretään HUD ja päivitetään näyttö
+            hud.draw(self.current_time)
             pygame.display.flip()
 
     def kulma_pelaajan_ja_hiiren_valilla(self, player, cam_x, cam_y):
@@ -258,3 +287,4 @@ class Kliittyma:
         dy = mouse_y - player_y
         angle = math.degrees(math.atan2(dy, dx))
         return angle
+    

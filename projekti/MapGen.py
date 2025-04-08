@@ -227,3 +227,29 @@ class Map:
             if center.distance_to(ball_center) <= radius:
                 balls.append(ball_pos)
         return balls
+
+    def get_room_center_dict(self):
+        room_cells = {}
+        for r in range(len(self.matrix)):
+            for c in range(len(self.matrix[r])):
+                room_id = self.matrix[r][c]
+                if room_id != 0:
+                    room_cells.setdefault(room_id, []).append((r, c))
+
+        center_dict = {}
+        for room_id, cells in room_cells.items():
+            min_r = min(r for r, c in cells)
+            max_r = max(r for r, c in cells)
+            min_c = min(c for r, c in cells)
+            max_c = max(c for r, c in cells)
+
+            left = (min_c * CELL_WIDTH + 1) * TILE_SIZE
+            right = (max_c * CELL_WIDTH + 1 + ROOM_WIDTH) * TILE_SIZE
+            top = (min_r * CELL_HEIGHT + 1) * TILE_SIZE
+            bottom = (max_r * CELL_HEIGHT + 1 + ROOM_HEIGHT) * TILE_SIZE
+
+            center_x = (left + right) // 2
+            center_y = (top + bottom) // 2
+            center_dict[room_id] = (center_x, center_y)
+
+        return center_dict
