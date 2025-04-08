@@ -2,9 +2,11 @@ import pygame
 import os
 import random
 
+project_dir = os.path.dirname(os.path.abspath(__file__)) # Lisätty tämä niin saadaan kuvat toimii millä tahansa koneella T. Markus
+
 class gamehud:
     def __init__(self, screen, SCREEN_WIDTH, SCREEN_HEIGHT):
-        self.path_redden = os.path.join("projekti", "media", "Img", "hud_hurtborder.png")
+        self.path_redden = os.path.join(project_dir, "media", "Img", "hud_hurtborder.png")
         self.screen = screen
         self.sw = SCREEN_WIDTH
         self.sh = SCREEN_HEIGHT
