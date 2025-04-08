@@ -245,15 +245,12 @@ class Kliittyma:
                 print("Voitit pelin!")
                 self.game_running = False
                 return
-
-            # Vihollisten spawnaus: spawnataan uusi vihollinen, jos aikaväli on umpeutunut ja alle maksimi määrä
+            
+            # Spawnaus tapahtuu aikarajalla
             if self.current_time - spawn_timer > SPAWN_INTERVAL and len(enemies) < MAX_ENEMIES:
-                # Selvitä pelaajan huone
                 player_row = player.rect.centery // (CELL_HEIGHT * TILE_SIZE)
                 player_col = player.rect.centerx // (CELL_WIDTH * TILE_SIZE)
                 player_room_id = matrix[player_row][player_col]
-
-                # Käytetään tarkkaa huone-ID -> keskipiste sanakirjaa
                 room_center_dict = game_map.get_room_center_dict()
 
                 valid_spawn_points = [
@@ -266,12 +263,12 @@ class Kliittyma:
                     enemies.append(Vihollinen(spawn_pos[0], spawn_pos[1]))
                 spawn_timer = self.current_time
 
-            # Päivitetään ja piirretään viholliset sekä tarkistetaan despawn-olosuhteet
+            # Tämä osa siirretään ulkopuolelle ja suoritetaan JOKA framella
             for enemy in enemies[:]:
                 if pygame.math.Vector2(enemy.rect.center).distance_to(player.rect.center) > DESPAWN_DISTANCE:
                     enemies.remove(enemy)
                 else:
-                    enemy.update(dt)
+                    enemy.update(dt, player.rect, matrix, game_map)
                     enemy.draw(self.screen, cam_x, cam_y)
 
             # Piirretään HUD ja päivitetään näyttö
