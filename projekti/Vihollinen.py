@@ -29,38 +29,52 @@ class Vihollinen:
         enemy_room_id = get_room_id_from_pos(self.rect.center)
         player_room_id = get_room_id_from_pos(player_rect.center)
 
-        # Jos ollaan samassa huoneessa tai oviaukolla, seuraa pelaajaa suoraan
         if enemy_room_id == player_room_id or any(self.rect.colliderect(door.rect) for door in game_map.doors):
+            # Ollaan samassa huoneessa tai oviaukossa
             target = pygame.math.Vector2(player_rect.center)
         else:
-            # Muussa tapauksessa etsi lähin ovi vihollisen huoneesta kohti pelaajaa
-            valid_doors = []
-            for door in game_map.doors:
-                door_room_id = get_room_id_from_pos(door.rect.center)
-                if door_room_id == enemy_room_id:
-                    valid_doors.append(door)
+            # BFS-reititys huoneiden välillä
+            path = game_map.find_path_between_rooms(enemy_room_id, player_room_id)
+            if len(path) >= 2:
+                next_room_id = path[1]
 
-            if valid_doors:
-                room_center_dict = game_map.get_room_center_dict()
-                player_room_center = room_center_dict.get(player_room_id, player_rect.center)
-                best_door = min(
-                    valid_doors,
-                    key=lambda d: pygame.math.Vector2(d.rect.center).distance_to(player_room_center)
-                )
-                target = pygame.math.Vector2(best_door.rect.center)
+                # Etsi ovi joka yhdistää nykyisen huoneen ja seuraavan
+                def door_connects(door, room_a, room_b):
+                    door_room = get_room_id_from_pos(door.rect.center)
+                    for dx in [-1, 1, 0, 0]:
+                        for dy in [-1, 1, 0, 0]:
+                            neighbor_pos = (door.rect.centerx + dx * TILE_SIZE, door.rect.centery + dy * TILE_SIZE)
+                            neighbor_room = get_room_id_from_pos(neighbor_pos)
+                            if {door_room, neighbor_room} == {room_a, room_b}:
+                                return True
+                    return False
+
+                possible_doors = [
+                    door for door in game_map.doors
+                    if door_connects(door, enemy_room_id, next_room_id)
+                ]
+
+                if possible_doors:
+                    best_door = min(
+                        possible_doors,
+                        key=lambda d: pygame.math.Vector2(d.rect.center).distance_to(self.rect.center)
+                    )
+                    target = pygame.math.Vector2(best_door.rect.center)
+                else:
+                    target = pygame.math.Vector2(player_rect.center)  # fallback
             else:
-                target = pygame.math.Vector2(player_rect.center)
+                target = pygame.math.Vector2(player_rect.center)  # fallback
 
-        # Liikkuminen kohti kohdetta
+        # Liikkuminen kohteeseen
         enemy_center = pygame.math.Vector2(self.rect.center)
         direction = target - enemy_center
         if direction.length() != 0:
             direction = direction.normalize()
         movement = direction * self.speed * (dt / 1000.0)
 
-        # Esteet (ovet eivät ole esteitä)
+        # Seinät (ovet sallitaan kulkuun)
         all_walls = game_map.get_walls_in_radius(self.rect.centerx, self.rect.centery, 200)
-        walls = all_walls  # Ovet ovat jo suodatettu pois build_global_tilemapissa, ei poisteta niitä uudelleen
+        walls = all_walls
 
         self.rect.x += movement.x
         if any(self.rect.colliderect(wall) for wall in walls):
@@ -69,6 +83,7 @@ class Vihollinen:
         self.rect.y += movement.y
         if any(self.rect.colliderect(wall) for wall in walls):
             self.rect.y -= movement.y
+
 
     def draw(self, surface, cam_x, cam_y):
         # Piirretään vihollinen punaisena neliönä

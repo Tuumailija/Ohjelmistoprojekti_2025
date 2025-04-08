@@ -253,3 +253,38 @@ class Map:
             center_dict[room_id] = (center_x, center_y)
 
         return center_dict
+
+    def get_room_graph(self):
+        rows, cols = len(self.matrix), len(self.matrix[0])
+        graph = {}
+        for r in range(rows):
+            for c in range(cols):
+                current = self.matrix[r][c]
+                if current == 0:
+                    continue
+                for dr, dc in [(0, 1), (1, 0)]:  # oikealle ja alas
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < rows and 0 <= nc < cols:
+                        neighbor = self.matrix[nr][nc]
+                        if neighbor != 0 and neighbor != current:
+                            graph.setdefault(current, set()).add(neighbor)
+                            graph.setdefault(neighbor, set()).add(current)
+        return graph
+
+    def find_path_between_rooms(self, start_id, end_id):
+        graph = self.get_room_graph()
+        from collections import deque
+        visited = set()
+        queue = deque([[start_id]])
+        while queue:
+            path = queue.popleft()
+            current = path[-1]
+            if current == end_id:
+                return path
+            if current not in visited:
+                visited.add(current)
+                for neighbor in graph.get(current, []):
+                    new_path = list(path)
+                    new_path.append(neighbor)
+                    queue.append(new_path)
+        return []
