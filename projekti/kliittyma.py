@@ -37,6 +37,8 @@ class Kliittyma:
 
         self.clock = pygame.time.Clock()
 
+        self.treasure_image = pygame.image.load(os.path.join(project_dir, "media", "Img", "TreasureChest.png")).convert_alpha()
+        self.treasure_image = pygame.transform.scale(self.treasure_image, (TILE_SIZE, TILE_SIZE))
 
         valikko_tausta = os.path.join(project_dir, "media", "Img", "ValikkoTausta.jpg")
         if os.path.exists(valikko_tausta):
@@ -51,7 +53,7 @@ class Kliittyma:
             self.menu_background = pygame.Surface((self.menu_tile_width, self.menu_tile_height))
             self.menu_background.fill((0, 0, 0))
 
-        taustakuva = os.path.join(project_dir, "media", "Img", "WoodFloorTexture.jpg")
+        taustakuva = os.path.join(project_dir, "media", "Img", "WoodenFloorTile.jpg")
         if os.path.exists(taustakuva):
             self.background = pygame.image.load(taustakuva).convert()
             self.tile_width = self.background.get_width()
@@ -193,6 +195,16 @@ class Kliittyma:
                         for door in game_map.doors:
                             if pygame.Vector2(player.rect.center).distance_to(pygame.Vector2(door.rect.center)) < 64:
                                 door.toggle(self.kulma_pelaajan_ja_hiiren_valilla(player, 0, 0))
+                        if player.rect.colliderect(game_map.win_tile):
+                            print("Pelaaja painoi E aarrearkkuun ja voitti pelin")
+                            self.nayta_voitto_ruutu()
+                            return
+
+                        if player.rect.colliderect(debug_tile):
+                            print("DEBUG: painettu E debug-arkulla!")
+                            self.nayta_voitto_ruutu(debug=True)
+                            return
+                    
                     # Debug-toimintoja
                     elif event.key == pygame.K_q:
                         hud.splatter(self.current_time)
@@ -249,20 +261,9 @@ class Kliittyma:
             player.draw(self.screen, cam_x, cam_y, angle)
 
             # Piirretään voittoruutu ja debug-ruutu
-            pygame.draw.rect(self.screen, (255, 255, 0), 
-                            pygame.Rect(game_map.win_tile.x - cam_x, game_map.win_tile.y - cam_y, game_map.win_tile.width, game_map.win_tile.height))
-            pygame.draw.rect(self.screen, (255, 165, 0), 
-                            pygame.Rect(debug_tile.x - cam_x, debug_tile.y - cam_y, debug_tile.width, debug_tile.height))
+            self.screen.blit(self.treasure_image, (game_map.win_tile.x - cam_x, game_map.win_tile.y - cam_y))
+            self.screen.blit(self.treasure_image, (debug_tile.x - cam_x, debug_tile.y - cam_y))
 
-            # Tarkistetaan, osuuko pelaaja debug-ruutuun tai voittoruudulle
-            if player.rect.colliderect(debug_tile):
-                print("DEBUG: osuma toisen huoneen laatikkoon")
-                self.game_running = False
-                return
-            if player.rect.colliderect(game_map.win_tile):
-                print("Voitit pelin!")
-                self.game_running = False
-                return
             
             # Spawnaus tapahtuu aikarajalla
             if self.current_time - spawn_timer > SPAWN_INTERVAL and len(enemies) < MAX_ENEMIES:
@@ -303,3 +304,25 @@ class Kliittyma:
         angle = math.degrees(math.atan2(dy, dx))
         return angle
     
+    def nayta_voitto_ruutu(self, debug=False):
+        fontti = pygame.font.SysFont("Arial", 80)
+        teksti = "VOITIT PELIN!"
+        alateksti = "Paina mitä tahansa näppäintä palataksesi valikkoon"
+        alafontti = pygame.font.SysFont("Arial", 40)
+
+        self.screen.fill((0, 0, 0))
+        voitto_teksti = fontti.render(teksti, True, (255, 255, 0))
+        alateksti_render = alafontti.render(alateksti, True, (200, 200, 200))
+        self.screen.blit(voitto_teksti, (self.screen.get_width() // 2 - voitto_teksti.get_width() // 2, 300))
+        self.screen.blit(alateksti_render, (self.screen.get_width() // 2 - alateksti_render.get_width() // 2, 450))
+        pygame.display.flip()
+
+        odota = True
+        while odota:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    odota = False
+                elif event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+        self.run() 
