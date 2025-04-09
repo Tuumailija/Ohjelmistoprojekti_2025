@@ -38,7 +38,7 @@ class Kliittyma:
         self.clock = pygame.time.Clock()
 
 
-        valikko_tausta = os.path.join(project_dir, "media", "Img", "Valikko_tausta.jpg")
+        valikko_tausta = os.path.join(project_dir, "media", "Img", "ValikkoTausta.jpg")
         if os.path.exists(valikko_tausta):
             print(f"Ladataan valikkotaustakuvaa: {valikko_tausta}")
             self.menu_background = pygame.image.load(valikko_tausta).convert()
