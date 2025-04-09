@@ -197,12 +197,14 @@ class Kliittyma:
                                 door.toggle(self.kulma_pelaajan_ja_hiiren_valilla(player, 0, 0))
                         if player.rect.colliderect(game_map.win_tile):
                             print("Pelaaja painoi E aarrearkkuun ja voitti pelin")
-                            self.game_running = False
+                            self.nayta_voitto_ruutu()
                             return
+
                         if player.rect.colliderect(debug_tile):
                             print("DEBUG: painettu E debug-arkulla!")
-                            self.game_running = False
+                            self.nayta_voitto_ruutu(debug=True)
                             return
+                    
                     # Debug-toimintoja
                     elif event.key == pygame.K_q:
                         hud.splatter(self.current_time)
@@ -302,3 +304,25 @@ class Kliittyma:
         angle = math.degrees(math.atan2(dy, dx))
         return angle
     
+    def nayta_voitto_ruutu(self, debug=False):
+        fontti = pygame.font.SysFont("Arial", 80)
+        teksti = "VOITIT PELIN!"
+        alateksti = "Paina mitä tahansa näppäintä palataksesi valikkoon"
+        alafontti = pygame.font.SysFont("Arial", 40)
+
+        self.screen.fill((0, 0, 0))
+        voitto_teksti = fontti.render(teksti, True, (255, 255, 0))
+        alateksti_render = alafontti.render(alateksti, True, (200, 200, 200))
+        self.screen.blit(voitto_teksti, (self.screen.get_width() // 2 - voitto_teksti.get_width() // 2, 300))
+        self.screen.blit(alateksti_render, (self.screen.get_width() // 2 - alateksti_render.get_width() // 2, 450))
+        pygame.display.flip()
+
+        odota = True
+        while odota:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    odota = False
+                elif event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+        self.run() 
