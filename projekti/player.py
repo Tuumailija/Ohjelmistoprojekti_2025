@@ -7,12 +7,14 @@ from raycast import Ray
 PLAYER_SIZE = 32
 PLAYER_SPEED = 5
 
+project_dir = os.path.dirname(os.path.abspath(__file__))
+
 class Player:
     def __init__(self, start_x, start_y):
         self.rect = pygame.Rect(start_x, start_y, PLAYER_SIZE, PLAYER_SIZE)
 
         # Pelaajan hattu
-        hattu_path = os.path.join("projekti", "media", "Img", "pelaaja.png")
+        hattu_path = os.path.join(project_dir, "media", "Img", "pelaaja.png")
         if os.path.exists(hattu_path):
             hattu_orig = pygame.image.load(hattu_path).convert_alpha()
             hattu_scaled = pygame.transform.scale(hattu_orig, (int(PLAYER_SIZE * 2), int(PLAYER_SIZE * 2)))
@@ -23,7 +25,7 @@ class Player:
             self.hattu_image.fill((0, 150, 0))
 
         # Pelaajan ase
-        ase_path = os.path.join("projekti", "media", "Img", "pelaajaAse.png")
+        ase_path = os.path.join(project_dir, "media", "Img", "pelaajaAse.png")
         if os.path.exists(ase_path):
             ase_orig = pygame.image.load(ase_path).convert_alpha()
             ase_scaled = pygame.transform.scale(ase_orig, (int(PLAYER_SIZE * 4.5), int(PLAYER_SIZE * 4.5)))
@@ -32,6 +34,15 @@ class Player:
             print(f"Virhe: Asekuvaa ei löytynyt polusta: {ase_path}")
             self.ase_image = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE), pygame.SRCALPHA)
             pygame.draw.rect(self.ase_image, (255, 0, 0), self.ase_image.get_rect())
+
+        
+        # Ladataan hyökkäysääni
+        aanen_polku = os.path.join(project_dir, "media", "miekka_ääni.mp3")
+        if os.path.exists(aanen_polku):
+            self.attack_sound = pygame.mixer.Sound(aanen_polku)
+        else:
+            print(f"Virhe: Hyökkäysääntä ei löytynyt polusta: {aanen_polku}")
+            self.attack_sound = None
 
         self.hp = 100
         self.is_attacking = False
@@ -82,6 +93,9 @@ class Player:
     def attack(self):
         self.is_attacking = True
         self.attack_timer = self.attack_duration
+        # Soitetaan hyökkäysääni
+        if self.attack_sound is not None:
+            self.attack_sound.play()
 
     def draw(self, screen, cam_x, cam_y, angle):
         self.angle = angle
