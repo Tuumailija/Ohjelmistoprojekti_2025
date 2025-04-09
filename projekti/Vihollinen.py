@@ -68,24 +68,45 @@ class Vihollinen:
             else:
                 target = pygame.math.Vector2(player_rect.center)
 
-        # Liikkuminen
+        # Liikkuminen ja suunta päivittyy samalla
         enemy_center = pygame.math.Vector2(self.rect.center)
         direction = target - enemy_center
         if direction.length() != 0:
+            # Korjaa kulmaa: tässä oletetaan, että alkuperäinen sprite katsoo ylös.
+            # Jos sprite katsoo eri suuntaan, säädä kulmakorjausta (tässä -90 astetta).
             self.angle = math.degrees(math.atan2(-direction.y, direction.x)) - 90
             direction = direction.normalize()
         movement = direction * self.speed * (dt / 1000.0)
 
+        # Haetaan törmäysesteet: huoneen seinät ja pelaaja.
         walls = game_map.get_walls_in_radius(self.rect.centerx, self.rect.centery, 200)
         walls.append(player_rect)
 
+        # Liikutetaan vihollista ensin kokonaisliikkeellä
         self.rect.x += movement.x
-        if any(self.rect.colliderect(wall) for wall in walls):
-            self.rect.x -= movement.x
-
         self.rect.y += movement.y
-        if any(self.rect.colliderect(wall) for wall in walls):
-            self.rect.y -= movement.y
+
+        # Tarkistetaan törmäykset ja korjataan ne "nudgeamalla" ulos
+        for wall in walls:
+            if self.rect.colliderect(wall):
+                # Lasketaan päällekkäisyys
+                overlap = self.rect.clip(wall)
+                if overlap.width == 0 or overlap.height == 0:
+                    continue  # Ei päällekkäisyyttä
+
+                # Korjataan pienimmän korjaussuunta-arvon mukaisesti
+                if overlap.width < overlap.height:
+                    # Pienempi korjaus vaakasuunnassa
+                    if self.rect.centerx < wall.centerx:
+                        self.rect.x -= overlap.width
+                    else:
+                        self.rect.x += overlap.width
+                else:
+                    # Pienempi korjaus pystysuunnassa
+                    if self.rect.centery < wall.centery:
+                        self.rect.y -= overlap.height
+                    else:
+                        self.rect.y += overlap.height
 
     def draw(self, surface, cam_x, cam_y):
         rotated_sprite = pygame.transform.rotate(self.original_sprite, self.angle)
