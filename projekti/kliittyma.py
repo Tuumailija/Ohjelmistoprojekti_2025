@@ -37,6 +37,20 @@ class Kliittyma:
 
         self.clock = pygame.time.Clock()
 
+
+        valikko_tausta = os.path.join(project_dir, "media", "Img", "Valikko_tausta.jpg")
+        if os.path.exists(valikko_tausta):
+            print(f"Ladataan valikkotaustakuvaa: {valikko_tausta}")
+            self.menu_background = pygame.image.load(valikko_tausta).convert()
+            self.menu_tile_width = self.menu_background.get_width()
+            self.menu_tile_height = self.menu_background.get_height()
+        else:
+            print(f"Valikkotaustakuvaa ei löytynyt polusta: {valikko_tausta}")
+            self.menu_tile_width = TILE_SIZE
+            self.menu_tile_height = TILE_SIZE
+            self.menu_background = pygame.Surface((self.menu_tile_width, self.menu_tile_height))
+            self.menu_background.fill((0, 0, 0))
+
         taustakuva = os.path.join(project_dir, "media", "Img", "WoodFloorTexture.jpg")
         if os.path.exists(taustakuva):
             self.background = pygame.image.load(taustakuva).convert()
@@ -54,7 +68,7 @@ class Kliittyma:
         if os.path.exists(musiikki_polku):
             print(f"Ladataan musiikkia: {musiikki_polku}")
             pygame.mixer.music.load(musiikki_polku)
-            pygame.mixer.music.set_volume(1.0)
+            pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play(-1)
             self.musiikki_soi = True
         else:
@@ -76,20 +90,24 @@ class Kliittyma:
         if os.path.exists(musiikki):
             print(f"Ladataan musiikkia: {musiikki}")
             pygame.mixer.music.load(musiikki)
-            pygame.mixer.music.set_volume(1.0)
+            pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play()
         else:
             print(f"Taustamusiikkia ei löytynyt polusta: {musiikki}")
 
     def run(self):
         self.valikko_musiikki()
-        self.screen.fill((0, 0, 0))
+        #self.screen.fill((0, 0, 0)) piirtää vaan mustan taustan
         self.piirra_valikko()
 
     def piirra_valikko(self):
         optio_lista = ["Aloita peli", "Ohjeet", "Lopeta"]
         iso_fontti = pygame.font.SysFont("Arial", 60)
         while True:
+            # Taustakuva
+            valikko_tausta = pygame.transform.scale(self.menu_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
+            self.screen.blit(valikko_tausta, (0, 0))
+
             self.screen.fill((0, 0, 0))
             mouse_pos = pygame.mouse.get_pos()
             valittu_optio = -1
