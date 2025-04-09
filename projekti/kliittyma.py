@@ -53,7 +53,7 @@ class Kliittyma:
             self.menu_background = pygame.Surface((self.menu_tile_width, self.menu_tile_height))
             self.menu_background.fill((0, 0, 0))
 
-        taustakuva = os.path.join(project_dir, "media", "Img", "WoodFloorTexture.jpg")
+        taustakuva = os.path.join(project_dir, "media", "Img", "WoodenFloorTile.jpg")
         if os.path.exists(taustakuva):
             self.background = pygame.image.load(taustakuva).convert()
             self.tile_width = self.background.get_width()
