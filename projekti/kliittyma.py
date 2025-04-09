@@ -110,11 +110,11 @@ class Kliittyma:
             valikko_tausta = pygame.transform.scale(self.menu_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
             self.screen.blit(valikko_tausta, (0, 0))
 
-            self.screen.fill((0, 0, 0))
             mouse_pos = pygame.mouse.get_pos()
             valittu_optio = -1
             keski_x = self.screen.get_width() // 2
             keski_y = self.screen.get_height() // 2 - (len(optio_lista) * 50 // 2)
+
             for i, optio in enumerate(optio_lista):
                 teksti = iso_fontti.render(optio, True, (255, 255, 255))
                 teksti_rect = teksti.get_rect(center=(keski_x, keski_y + i * 100))
@@ -122,7 +122,9 @@ class Kliittyma:
                     teksti = iso_fontti.render(optio, True, (255, 0, 0))
                     valittu_optio = i
                 self.screen.blit(teksti, teksti_rect)
+
             pygame.display.flip()
+            
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if valittu_optio == 0:
