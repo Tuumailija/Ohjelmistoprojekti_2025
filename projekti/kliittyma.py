@@ -76,7 +76,7 @@ class Kliittyma:
         if os.path.exists(musiikki_polku):
             print(f"Ladataan musiikkia: {musiikki_polku}")
             pygame.mixer.music.load(musiikki_polku)
-            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play(-1)
             self.musiikki_soi = True
         else:
@@ -98,7 +98,7 @@ class Kliittyma:
         if os.path.exists(musiikki):
             print(f"Ladataan musiikkia: {musiikki}")
             pygame.mixer.music.load(musiikki)
-            pygame.mixer.music.set_volume(0.3)
+            pygame.mixer.music.set_volume(0.1)
             pygame.mixer.music.play()
         else:
             print(f"Taustamusiikkia ei löytynyt polusta: {musiikki}")
@@ -110,7 +110,7 @@ class Kliittyma:
 
     def piirra_valikko(self):
         optio_lista = ["Aloita peli", "Ohjeet", "Lopeta"]
-        iso_fontti = pygame.font.SysFont("Old English Text MT", 60)
+        iso_fontti = pygame.font.SysFont("Old English Text MT", 70)
         while True:
             # Taustakuva
             valikko_tausta = pygame.transform.scale(self.menu_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
