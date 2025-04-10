@@ -175,7 +175,7 @@ class Kliittyma:
 
         # Lista vihollisille ja parametrit spawnausta ja despawnausta varten
         enemies = []
-        MAX_ENEMIES = 10
+        MAX_ENEMIES = 1
         SPAWN_INTERVAL = 3000         # Spawnataan uusi vihollinen x ms välein
         DESPAWN_DISTANCE = 1500       # Jos vihollinen on yli x pikselin päässä pelaajasta, se poistetaan
         spawn_timer = pygame.time.get_ticks()
@@ -290,7 +290,7 @@ class Kliittyma:
                     enemies.remove(enemy)
                 else:
                     enemy.update(dt, player.rect, matrix, game_map)
-                    enemy.draw(self.screen, cam_x, cam_y)
+                    enemy.draw(self.screen, cam_x, cam_y, player.rect.center, angle)
 
             # Piirretään HUD ja päivitetään näyttö
             hud.draw(self.current_time)

@@ -2,13 +2,10 @@ from numpy import linspace
 import pygame
 import math
 from .ray import Ray
-import numpy as np
-import pygame.surfarray
-import scipy.ndimage
-
 
 rayNumber = (360//16)
-fieldOfVision = linspace(0, 360/4, rayNumber)
+fieldOfVisionDegrees = 360/4
+fieldOfVision = linspace(0, fieldOfVisionDegrees, rayNumber)
 
 class RayCaster:
     def __init__(self, screen, ray_length):
