@@ -39,12 +39,12 @@ class Kliittyma:
 
         aarrearkku = os.path.join(project_dir, "media", "Img", "TreasureChest.png")
         if os.path.exists(aarrearkku):
-            self.treasure_chest = pygame.image.load(aarrearkku).convert()
-            self.treasure_chest = pygame.transform.scale(self.treasure_chest, (TILE_SIZE, TILE_SIZE))
+            self.treasure_image = pygame.image.load(aarrearkku).convert_alpha()
+            self.treasure_image = pygame.transform.scale(self.treasure_image, (TILE_SIZE, TILE_SIZE))
         else:
             print(f"Aarrearkkukuvaa ei löytynyt polusta: {aarrearkku}")
-            self.treasure_chest = pygame.Surface((TILE_SIZE, TILE_SIZE))
-            self.treasure_chest.fill((255, 215, 0))
+            self.treasure_image = pygame.Surface((TILE_SIZE, TILE_SIZE))
+            self.treasure_image.fill((255, 215, 0))
 
         valikko_tausta = os.path.join(project_dir, "media", "Img", "ValikkoTausta.jpg")
         if os.path.exists(valikko_tausta):
