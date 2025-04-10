@@ -153,7 +153,7 @@ class Kliittyma:
             "Käytä hiirtä kääntääksesi pelaajan katsetta.",
             "Poistu ohjeista painamalla ESC",
         ]
-        pieni_fontti = pygame.font.SysFont("Arial", 40)
+        pieni_fontti = pygame.font.SysFont("Old English Text MT", 40)
         for i, rivi in enumerate(ohjeet_teksti):
             teksti = pieni_fontti.render(rivi, True, (255, 255, 255))
             self.screen.blit(teksti, (self.screen.get_width() // 2 - teksti.get_width() // 2, 150 + i * 60))
