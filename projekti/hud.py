@@ -20,7 +20,7 @@ class gamehud:
 
         #perus hud-elementtäejä taso
         #tähän piirretään pelaajan hp sun muita mitä nyt hudiin tahdotaan.
-        self.general_hud = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
+        #self.general_hud = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
 
         #veriläiskä taso
         self.player_splatter_layer = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
@@ -30,8 +30,9 @@ class gamehud:
         #punaisen reunustan taso
         self.player_hp_layer = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
         self.redborder = pygame.image.load(self.path_redden).convert_alpha()
-        self.redborder.set_alpha(100)
+        self.redborder.set_alpha(0)
         self.redborder_rect = self.redborder.get_rect()
+        self.lastdrawnhp = 40693
 
     def splatter(self, current_time):
         self.pyyhipois = current_time+2000
@@ -51,16 +52,30 @@ class gamehud:
 
         # toteutus vielä vituillaan
         # tässä ehkä tarvitsee vain säätää sen kuvan läpinäkyvyys, sen voi periaatteessa aina piirtää.
-        self.redborder.set_alpha(hp)
+        newalpha = (100-hp) * 3
+        if newalpha < 0:
+            newalpha = 0
+
+        print(newalpha)
+
+        self.redborder.set_alpha(newalpha)
         self.redborder_rect = self.redborder.get_rect()
+        self.player_hp_layer.blit(self.redborder, (0, 0), self.redborder_rect)
+        self.lastdrawnhp = hp
     
     def draw(self, current_time, hp):
         #punaiset reunat jos hahmo on kipeä
-        self.redden(hp)
-        self.player_hp_layer.blit(self.player_hp_layer, (0, 0), self.redborder_rect)
-
+        if self.lastdrawnhp is not hp:
+            self.player_hp_layer = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
+            self.redden(hp)
+        
+        self.screen.blit(self.player_hp_layer, (0, 0))
+        
         #laske 2 sekuntia, sitten laita self.show_verilaiska = False
         if current_time > self.pyyhipois:
             self.player_splatter_layer = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
         else:
             self.screen.blit(self.player_splatter_layer, (0, 0))
+
+        text_surface = pygame.font.SysFont('Forte', 72).render('HP: ' + str(hp), False, (255, 255, 255))
+        self.screen.blit(text_surface, (0, 0))

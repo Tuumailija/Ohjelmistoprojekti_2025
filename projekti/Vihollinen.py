@@ -112,8 +112,10 @@ class Vihollinen:
                 
                 #jos törmätty kohde on pelaaja
                 if wall == player.rect:
-                    player.hurt(35)
-                    print("vihollinen osui pelaajaan [" + str(player.hp) + "]")
+                    #satuta pelaajaa jos iframet sallii
+                    if not player.ishurting:
+                        player.hurt(35)
+                        print("vihollinen osui pelaajaan [" + str(player.hp) + "]")
 
     def draw(self, surface, cam_x, cam_y, player_pos, player_angle):
         player_angle *= -1

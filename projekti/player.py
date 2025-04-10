@@ -70,7 +70,7 @@ class Player:
         self.light_intensity = 1.0
 
     def set_lighting(self, light_positions, obstacles):
-        """Päivittää pelaajan valaistusarvon ympäröivien valojen perusteella, sulavasti"""
+        #Päivittää pelaajan valaistusarvon ympäröivien valojen perusteella, sulavasti
         target = 0.0
         point = pygame.Vector2(self.rect.center)
         for light_pos in light_positions:
