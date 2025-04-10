@@ -98,7 +98,7 @@ class Kliittyma:
         if os.path.exists(musiikki):
             print(f"Ladataan musiikkia: {musiikki}")
             pygame.mixer.music.load(musiikki)
-            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.set_volume(0.3)
             pygame.mixer.music.play()
         else:
             print(f"Taustamusiikkia ei löytynyt polusta: {musiikki}")
@@ -110,7 +110,7 @@ class Kliittyma:
 
     def piirra_valikko(self):
         optio_lista = ["Aloita peli", "Ohjeet", "Lopeta"]
-        iso_fontti = pygame.font.SysFont("Arial", 60)
+        iso_fontti = pygame.font.SysFont("Old English Text MT", 60)
         while True:
             # Taustakuva
             valikko_tausta = pygame.transform.scale(self.menu_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -122,7 +122,7 @@ class Kliittyma:
             keski_y = self.screen.get_height() // 2 - (len(optio_lista) * 50 // 2)
 
             for i, optio in enumerate(optio_lista):
-                teksti = iso_fontti.render(optio, True, (255, 255, 255))
+                teksti = iso_fontti.render(optio, True, (0, 0, 0))
                 teksti_rect = teksti.get_rect(center=(keski_x, keski_y + i * 100))
                 if teksti_rect.collidepoint(mouse_pos):
                     teksti = iso_fontti.render(optio, True, (255, 0, 0))
@@ -181,7 +181,7 @@ class Kliittyma:
 
         # Lista vihollisille ja parametrit spawnausta ja despawnausta varten
         enemies = []
-        MAX_ENEMIES = 10
+        MAX_ENEMIES = 1
         SPAWN_INTERVAL = 3000         # Spawnataan uusi vihollinen x ms välein
         DESPAWN_DISTANCE = 1500       # Jos vihollinen on yli x pikselin päässä pelaajasta, se poistetaan
         spawn_timer = pygame.time.get_ticks()
@@ -296,7 +296,7 @@ class Kliittyma:
                     enemies.remove(enemy)
                 else:
                     enemy.update(dt, player.rect, matrix, game_map)
-                    enemy.draw(self.screen, cam_x, cam_y)
+                    enemy.draw(self.screen, cam_x, cam_y, player.rect.center, angle)
 
             # Piirretään HUD ja päivitetään näyttö
             hud.draw(self.current_time)
