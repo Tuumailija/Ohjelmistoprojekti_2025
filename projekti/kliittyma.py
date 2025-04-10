@@ -38,7 +38,7 @@ class Kliittyma:
         self.clock = pygame.time.Clock()
 
         aarrearkku = os.path.join(project_dir, "media", "Img", "TreasureChest.png")
-        if os.path.exists(taustakuva):
+        if os.path.exists(aarrearkku):
             self.treasure_chest = pygame.image.load(aarrearkku).convert()
             self.treasure_chest = pygame.transform.scale(self.treasure_chest, (TILE_SIZE, TILE_SIZE))
         else:
