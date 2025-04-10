@@ -44,6 +44,17 @@ class Player:
             print(f"Virhe: Hyökkäysääntä ei löytynyt polusta: {aanen_polku}")
             self.attack_sound = None
 
+
+        # Pelaajan liikkumis ääni
+        liikkumis_aanen_polku = os.path.join(project_dir, "media", "Kavelypuulla.mp3")
+        if os.path.exists(liikkumis_aanen_polku):
+            print("Liikkumisääni ladattu onnistuneesti.")
+            self.move_sound = pygame.mixer.Sound(liikkumis_aanen_polku)
+        else:
+            print(f"Virhe: Liikkumisääntä ei löytynyt polusta: {liikkumis_aanen_polku}")
+            self.move_sound = None
+        
+
         self.hp = 100
         self.is_attacking = False
         self.attack_timer = 0
@@ -83,6 +94,14 @@ class Player:
         if any(self.rect.colliderect(wall) for wall in walls): self.rect.x = old_rect.x
         self.rect.y += dy
         if any(self.rect.colliderect(wall) for wall in walls): self.rect.y = old_rect.y
+
+        # Liikkumisääni
+        if (dx != 0 or dy != 0) and self.move_sound is not None:
+            if self.move_sound.get_num_channels() == 0:
+                self.move_sound.play(-1)
+        else:
+            if self.move_sound is not None:
+                self.move_sound.stop()
 
     def update(self, dt):
         if self.is_attacking:
