@@ -25,7 +25,7 @@ class Vihollinen:
         self.original_sprite = pygame.transform.scale(self.original_sprite, (size, size))
         self.sprite = self.original_sprite  # Alustetaan sprite
 
-    def update(self, dt, player_rect, matrix, game_map):
+    def update(self, dt, player, matrix, game_map):
         def get_room_id_from_pos(pos):
             x, y = pos
             col = x // (CELL_WIDTH * TILE_SIZE)
@@ -35,10 +35,10 @@ class Vihollinen:
             return -1
 
         enemy_room_id = get_room_id_from_pos(self.rect.center)
-        player_room_id = get_room_id_from_pos(player_rect.center)
+        player_room_id = get_room_id_from_pos(player.rect.center)
 
         if enemy_room_id == player_room_id or any(self.rect.colliderect(door.rect) for door in game_map.doors):
-            target = pygame.math.Vector2(player_rect.center)
+            target = pygame.math.Vector2(player.rect.center)
         else:
             path = game_map.find_path_between_rooms(enemy_room_id, player_room_id)
             if len(path) >= 2:
@@ -66,9 +66,9 @@ class Vihollinen:
                     )
                     target = pygame.math.Vector2(best_door.rect.center)
                 else:
-                    target = pygame.math.Vector2(player_rect.center)
+                    target = pygame.math.Vector2(player.rect.center)
             else:
-                target = pygame.math.Vector2(player_rect.center)
+                target = pygame.math.Vector2(player.rect.center)
 
         # Liikkuminen ja suunta päivittyy samalla
         enemy_center = pygame.math.Vector2(self.rect.center)
@@ -82,7 +82,7 @@ class Vihollinen:
 
         # Haetaan törmäysesteet: huoneen seinät ja pelaaja.
         walls = game_map.get_walls_in_radius(self.rect.centerx, self.rect.centery, 200)
-        walls.append(player_rect)
+        walls.append(player.rect)
 
         # Liikutetaan vihollista ensin kokonaisliikkeellä
         self.rect.x += movement.x
@@ -109,6 +109,11 @@ class Vihollinen:
                         self.rect.y -= overlap.height
                     else:
                         self.rect.y += overlap.height
+                
+                #jos törmätty kohde on pelaaja
+                if wall == player.rect:
+                    player.hurt(35)
+                    print("vihollinen osui pelaajaan [" + str(player.hp) + "]")
 
     def draw(self, surface, cam_x, cam_y, player_pos, player_angle):
         player_angle *= -1

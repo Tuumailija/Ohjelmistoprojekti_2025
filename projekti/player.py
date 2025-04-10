@@ -1,6 +1,7 @@
 import pygame
 import os
 import math
+import sys
 from raycast import Ray
 
 
@@ -10,8 +11,9 @@ PLAYER_SPEED = 5
 project_dir = os.path.dirname(os.path.abspath(__file__))
 
 class Player:
-    def __init__(self, start_x, start_y):
+    def __init__(self, start_x, start_y, hud):
         self.rect = pygame.Rect(start_x, start_y, PLAYER_SIZE, PLAYER_SIZE)
+        self.hud = hud
 
         # Pelaajan hattu
         hattu_path = os.path.join(project_dir, "media", "Img", "pelaaja.png")
@@ -56,6 +58,9 @@ class Player:
         
 
         self.hp = 100
+        self.iframes = 600
+        self.stop_hurting = 0 #kellonaika+iftames varmaan huono tapa :(
+        self.ishurting = False
         self.is_attacking = False
         self.attack_timer = 0
         self.attack_duration = 200
@@ -116,7 +121,24 @@ class Player:
         if self.attack_sound is not None:
             self.attack_sound.play()
 
+    def hurt(self, damage):
+        if not self.ishurting:
+            self.hp -= damage
+            self.hud.splatter(pygame.time.get_ticks())
+            #iframet
+            self.ishurting = True
+            self.stop_hurting = pygame.time.get_ticks() + self.iframes
+
+
     def draw(self, screen, cam_x, cam_y, angle):
+        #no vaikka tapan sen.
+        if self.hp < 1:
+            print("pelaaja kuoli")
+
+
+        if pygame.time.get_ticks() > self.stop_hurting:
+            self.ishurting = False
+
         self.angle = angle
 
         center = pygame.Vector2(self.rect.centerx - cam_x, self.rect.centery - cam_y)

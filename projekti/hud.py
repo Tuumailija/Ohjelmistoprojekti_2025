@@ -11,6 +11,10 @@ class gamehud:
         self.sw = SCREEN_WIDTH
         self.sh = SCREEN_HEIGHT
 
+        #perus hud-elementtäejä taso
+        #tähän piirretään pelaajan hp sun muita mitä nyt hudiin tahdotaan.
+        self.general_hud = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
+
         #veriläiskä taso
         self.player_splatter_layer = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
         #aika jolloin splatteri poistetaan (current_time+2000)
@@ -19,7 +23,7 @@ class gamehud:
         #punaisen reunustan taso
         self.player_hp_layer = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
         self.redborder = pygame.image.load(self.path_redden).convert_alpha()
-        self.redborder.set_alpha(0)
+        self.redborder.set_alpha(100)
         self.redborder_rect = self.redborder.get_rect()
 
     def splatter(self, current_time):
@@ -43,8 +47,9 @@ class gamehud:
         self.redborder.set_alpha(hp)
         self.redborder_rect = self.redborder.get_rect()
     
-    def draw(self, current_time):
+    def draw(self, current_time, hp):
         #punaiset reunat jos hahmo on kipeä
+        self.redden(hp)
         self.player_hp_layer.blit(self.player_hp_layer, (0, 0), self.redborder_rect)
 
         #laske 2 sekuntia, sitten laita self.show_verilaiska = False

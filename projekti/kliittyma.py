@@ -175,7 +175,7 @@ class Kliittyma:
         start_r, start_c = MATRIX_ROWS // 2, 0
         start_x = (start_c * CELL_WIDTH + 1 + 10 // 2) * TILE_SIZE
         start_y = (start_r * CELL_HEIGHT + 1 + 8 // 2) * TILE_SIZE
-        player = Player(start_x, start_y)
+        player = Player(start_x, start_y, hud)
 
         debug_tile = game_map.get_debug_tile()  # DEBUG
 
@@ -214,11 +214,13 @@ class Kliittyma:
                             return
                     
                     # Debug-toimintoja
-                    elif event.key == pygame.K_q:
-                        hud.splatter(self.current_time)
                     elif event.key == pygame.K_c:
                         hud.redden(player.hp)
                         player.hp -= 10
+                    elif event.key == pygame.K_v:
+                        hud.redden(player.hp)
+                        player.hp += 10
+
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     player.attack()
 
@@ -295,11 +297,11 @@ class Kliittyma:
                 if pygame.math.Vector2(enemy.rect.center).distance_to(player.rect.center) > DESPAWN_DISTANCE:
                     enemies.remove(enemy)
                 else:
-                    enemy.update(dt, player.rect, matrix, game_map)
+                    enemy.update(dt, player, matrix, game_map)
                     enemy.draw(self.screen, cam_x, cam_y, player.rect.center, angle)
 
             # Piirretään HUD ja päivitetään näyttö
-            hud.draw(self.current_time)
+            hud.draw(self.current_time, player.hp)
             pygame.display.flip()
 
     def kulma_pelaajan_ja_hiiren_valilla(self, player, cam_x, cam_y):
