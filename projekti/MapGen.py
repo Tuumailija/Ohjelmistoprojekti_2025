@@ -110,6 +110,7 @@ class Map:
     def get_wall_rects(self):
         visited = set()
         wall_rects = []
+        padding = 2
 
         # Manuaalinen vasen seinä lisäys testiksi
         wall_rects.append(pygame.Rect(0, TILE_SIZE, TILE_SIZE, ROOM_HEIGHT * TILE_SIZE))
@@ -125,7 +126,12 @@ class Map:
                         for i in range(width):
                             visited.add((x + i, y + height))
                         height += 1
-                    wall_rects.append(pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, width * TILE_SIZE, height * TILE_SIZE))
+                    wall_rects.append(pygame.Rect(
+                        x * TILE_SIZE - padding,
+                        y * TILE_SIZE - padding,
+                        width * TILE_SIZE + padding * 2,
+                        height * TILE_SIZE + padding * 2
+                    ))
                     visited.update((x + i, y + j) for i in range(width) for j in range(height))
         return wall_rects
 
