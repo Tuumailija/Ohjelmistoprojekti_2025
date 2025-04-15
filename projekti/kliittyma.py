@@ -45,6 +45,15 @@ class Kliittyma:
             print(f"Aarrearkkukuvaa ei löytynyt polusta: {aarrearkku}")
             self.treasure_image = pygame.Surface((TILE_SIZE, TILE_SIZE))
             self.treasure_image.fill((255, 215, 0))
+        
+        lantern = os.path.join(project_dir, "media", "Img", "LanternSprite.png")
+        if os.path.exists(lantern):
+            self.lantern_image = pygame.image.load(lantern).convert_alpha()
+            self.lantern_image = pygame.transform.scale(self.lantern_image, (TILE_SIZE, TILE_SIZE))
+        else:
+            print(f"LanternSprite.png:tä ei löytynyt: {lantern}")
+            self.lantern_image = pygame.Surface((TILE_SIZE, TILE_SIZE))
+            self.lantern_image.fill((255, 255, 0))
 
         valikko_tausta = os.path.join(project_dir, "media", "Img", "ValikkoTausta.jpg")
         if os.path.exists(valikko_tausta):
@@ -268,6 +277,12 @@ class Kliittyma:
             self.ray_caster.set_valot(lights)
             self.ray_caster.update_rays((player.rect.centerx - cam_x, player.rect.centery - cam_y), angle)
             player.set_lighting(lights, walls)
+
+            for light_pos in lights:
+                screen_x = light_pos[0] - cam_x
+                screen_y = light_pos[1] - cam_y
+                self.screen.blit(self.lantern_image, (screen_x - TILE_SIZE // 2, screen_y - TILE_SIZE // 2))
+
             player.draw(self.screen, cam_x, cam_y, angle)
 
             # Piirretään voittoruutu ja debug-ruutu
