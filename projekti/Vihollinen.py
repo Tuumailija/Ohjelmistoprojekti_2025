@@ -25,6 +25,16 @@ class Vihollinen:
         self.original_sprite = pygame.transform.scale(self.original_sprite, (size, size))
         self.sprite = self.original_sprite  # Alustetaan sprite
 
+        # Vihollisten ääni
+        vihujenaani_polku = os.path.join(project_dir, "media", "Vihollisten_aani.wav")
+        if os.path.exists(vihujenaani_polku):
+            self.vihujenaani = pygame.mixer.Sound(vihujenaani_polku)
+            self.vihujenaani.set_volume(0.5)  # Säädetään äänenvoimakkuus
+        else:
+            print(f"Äänitiedostoa ei löydy: {vihujenaani_polku}")
+            self.vihujenaani = None
+
+
     def update(self, dt, player, matrix, game_map):
         def get_room_id_from_pos(pos):
             x, y = pos
@@ -116,6 +126,9 @@ class Vihollinen:
                     if not player.ishurting:
                         player.hurt(35)
                         print("vihollinen osui pelaajaan [" + str(player.hp) + "]")
+
+                        if self.vihujenaani is not None:
+                            self.vihujenaani.play()
 
     def draw(self, surface, cam_x, cam_y, player_pos, player_angle):
         player_angle *= -1
