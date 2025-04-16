@@ -5,6 +5,7 @@ import random
 from MapGen import CELL_WIDTH, CELL_HEIGHT, TILE_SIZE
 from raycast import raycaster
 from raycast.raycaster import fieldOfVisionDegrees
+from raycast.ray import Ray  # varmista että import toimii oikein
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -130,7 +131,7 @@ class Vihollinen:
                         if self.vihujenaani is not None:
                             self.vihujenaani.play()
 
-    def draw(self, surface, cam_x, cam_y, player_pos, player_angle):
+    def draw(self, surface, cam_x, cam_y, player_pos, player_angle, obstacles=None):
         player_angle *= -1
         visionField = fieldOfVisionDegrees - 35
 
@@ -146,21 +147,17 @@ class Vihollinen:
         if angle_diff > visionField:
             return
 
+        # Raycast: tarkistetaan esteet pelaajan ja vihollisen välillä
+        if obstacles is not None:
+            start = pygame.Vector2(player_pos)
+            end = pygame.Vector2(self.rect.center)
+            direction = (end - start).normalize()
+            ray = Ray(start, math.atan2(direction.y, direction.x), start.distance_to(end))
+            hit_points = ray.cast(obstacles)
+            if hit_points and (hit_points[-1].distance_to(end) > 10):
+                return  # Este välissä, ei piirretä
+            
         # Piirretään vihollinen normaalisti
         rotated_sprite = pygame.transform.rotate(self.original_sprite, self.angle)
         sprite_rect = rotated_sprite.get_rect(center=(self.rect.centerx - cam_x, self.rect.centery - cam_y))
         surface.blit(rotated_sprite, sprite_rect)
-
-        # DEBUG (viivat näytölle)
-        screen_center_x = surface.get_width() // 2
-        screen_center_y = surface.get_height() // 2
-
-        ## Viholliseen osoittava viiva (punainen)
-        #enemy_line_x = screen_center_x + 100 * math.cos(math.radians(angle_to_enemy))
-        #enemy_line_y = screen_center_y - 100 * math.sin(math.radians(angle_to_enemy))
-        #pygame.draw.line(surface, (255, 0, 0), (screen_center_x, screen_center_y), (enemy_line_x, enemy_line_y), 2)
-#
-        ## Pelaajan katsesuunta (vihreä)
-        #player_line_x = screen_center_x + 100 * math.cos(math.radians(player_angle))
-        #player_line_y = screen_center_y - 100 * math.sin(math.radians(player_angle))
-        #pygame.draw.line(surface, (0, 255, 0), (screen_center_x, screen_center_y), (player_line_x, player_line_y), 2)

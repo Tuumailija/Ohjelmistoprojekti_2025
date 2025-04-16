@@ -313,7 +313,7 @@ class Kliittyma:
                     enemies.remove(enemy)
                 else:
                     enemy.update(dt, player, matrix, game_map)
-                    enemy.draw(self.screen, cam_x, cam_y, player.rect.center, angle)
+                    enemy.draw(self.screen, cam_x, cam_y, player.rect.center, angle, walls)
 
             # Piirretään HUD ja päivitetään näyttö
             hud.draw(self.current_time, player.hp)
