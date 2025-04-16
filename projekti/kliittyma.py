@@ -8,6 +8,8 @@ from tile_kartta import Kartta
 from MapGen import Map, FLOOR, TILE_SIZE, WALL, CELL_WIDTH, CELL_HEIGHT, ROOM_WIDTH, ROOM_HEIGHT
 from player import Player
 from raycast import RayCaster
+from raycast.raycaster import fieldOfVisionDegrees
+from raycast.ray import Ray
 from ovi import Door
 from hud import *
 from Vihollinen import Vihollinen
@@ -297,9 +299,19 @@ class Kliittyma:
             player.set_lighting(lights, walls)
 
             for light_pos in lights:
-                screen_x = light_pos[0] - cam_x
-                screen_y = light_pos[1] - cam_y
-                self.screen.blit(self.lantern_image, (screen_x - TILE_SIZE // 2, screen_y - TILE_SIZE // 2))
+                dx = light_pos[0] - player.rect.centerx
+                dy = light_pos[1] - player.rect.centery
+                angle_to_light = math.degrees(math.atan2(dy, dx))
+                angle_diff = abs((angle_to_light - angle + 180) % 360 - 180)
+
+                if angle_diff < fieldOfVisionDegrees * 0.6: # 0.6 arvolla lyhdyt ilmestyvät näkökentän reunassa esiin
+                    player_center = pygame.Vector2(player.rect.center)
+                    distance = player_center.distance_to(pygame.Vector2(light_pos))
+                    ray = Ray(player_center, math.radians(angle_to_light), distance)
+                    if ray.cast_to_light(light_pos, walls):
+                        screen_x = light_pos[0] - cam_x
+                        screen_y = light_pos[1] - cam_y
+                        self.screen.blit(self.lantern_image, (screen_x - TILE_SIZE // 2, screen_y - TILE_SIZE // 2))
 
             player.draw(self.screen, cam_x, cam_y, angle)
 
