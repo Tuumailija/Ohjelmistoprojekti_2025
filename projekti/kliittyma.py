@@ -204,10 +204,16 @@ class Kliittyma:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                    
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.game_running = False
                         return
+                    
+                    elif event.key == pygame.K_1:
+                        player.show_debug_hitbox = not player.show_debug_hitbox
+                        print(f"[DEBUG] Hyökkäyshitti-näyttö {'päälle' if player.show_debug_hitbox else 'pois'}")
+
                     elif event.key == pygame.K_e:
                         for door in game_map.doors:
                             if pygame.Vector2(player.rect.center).distance_to(pygame.Vector2(door.rect.center)) < 64:
