@@ -312,6 +312,7 @@ class Kliittyma:
                 if pygame.math.Vector2(enemy.rect.center).distance_to(player.rect.center) > DESPAWN_DISTANCE:
                     enemies.remove(enemy)
                 else:
+                    enemy.set_lighting(lights, walls)
                     enemy.update(dt, player, matrix, game_map)
                     enemy.draw(self.screen, cam_x, cam_y, player.rect.center, angle, walls)
 

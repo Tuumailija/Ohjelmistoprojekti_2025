@@ -16,10 +16,12 @@ def get_room_id_from_pos(pos, matrix):
     return matrix[row][col]
 
 class Vihollinen:
-    def __init__(self, x, y, size=64):  # isompi koko
+    def __init__(self, x, y, size=64):
         self.rect = pygame.Rect(x, y, size, size)
         self.speed = 100
-        self.angle = 0  # suunta-arvo spriteä varten
+        self.angle = 0
+
+        self.light_intensity = 1.0  # 🔧 Alustetaan oletusarvo valaistukselle
 
         kuva_polku = os.path.join(project_dir, "media", "Img", "zombie.PNG")
         self.original_sprite = pygame.image.load(kuva_polku).convert_alpha()
@@ -157,7 +159,35 @@ class Vihollinen:
             if hit_points and (hit_points[-1].distance_to(end) > 10):
                 return  # Este välissä, ei piirretä
             
-        # Piirretään vihollinen normaalisti
+        # Piirretään vihollinen normaalisti kirkkaudella
         rotated_sprite = pygame.transform.rotate(self.original_sprite, self.angle)
+        brightness = int(self.light_intensity * 255)
+
+        # Kirkkauden säätö (sama kuin pelaajalla)
+        def apply_brightness(surface, brightness):
+            temp = surface.copy()
+            darken = pygame.Surface(temp.get_size()).convert_alpha()
+            darken.fill((brightness, brightness, brightness, 255))
+            temp.blit(darken, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+            return temp
+
+        rotated_sprite = apply_brightness(rotated_sprite, brightness)
         sprite_rect = rotated_sprite.get_rect(center=(self.rect.centerx - cam_x, self.rect.centery - cam_y))
         surface.blit(rotated_sprite, sprite_rect)
+
+    def set_lighting(self, light_positions, obstacles):
+        target = 0.0
+        point = pygame.Vector2(self.rect.center)
+        for light_pos in light_positions:
+            ray = Ray(point, 0, point.distance_to(light_pos))
+            light_value = ray.cast_to_light(light_pos, obstacles)
+            if light_value is not None:
+                target += light_value
+        target *= 3
+        target = min(target, 1.0)
+        target = max(target, 0.2)
+
+        smoothing_speed = 0.1
+        if not hasattr(self, "light_intensity"):
+            self.light_intensity = 1.0
+        self.light_intensity += (target - self.light_intensity) * smoothing_speed
