@@ -229,9 +229,23 @@ class Kliittyma:
                     elif event.key == pygame.K_v:
                         hud.redden(player.hp)
                         player.hp += 10
-
+                        
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     player.attack()
+
+                    hitbox = player.get_attack_hitbox()
+                    if hitbox:
+                        attack_poly_rect = pygame.Rect(
+                            min(p.x for p in hitbox),
+                            min(p.y for p in hitbox),
+                            max(p.x for p in hitbox) - min(p.x for p in hitbox),
+                            max(p.y for p in hitbox) - min(p.y for p in hitbox)
+                        )
+
+                        for enemy in enemies:
+                            if attack_poly_rect.colliderect(enemy.rect):
+                                enemy.take_damage()
+
 
             # Hae esteet (seinät + ovet) pelaajaa ympäriltä
             doors_in_radius = [door.rect for door in game_map.doors 
@@ -309,6 +323,9 @@ class Kliittyma:
 
             # Tämä osa siirretään ulkopuolelle ja suoritetaan JOKA framella
             for enemy in enemies[:]:
+                if enemy.health_state == 0:
+                    enemies.remove(enemy)
+                    continue
                 if pygame.math.Vector2(enemy.rect.center).distance_to(player.rect.center) > DESPAWN_DISTANCE:
                     enemies.remove(enemy)
                 else:
