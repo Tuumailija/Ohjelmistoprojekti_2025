@@ -14,6 +14,7 @@ class Player:
     def __init__(self, start_x, start_y, hud):
         self.rect = pygame.Rect(start_x, start_y, PLAYER_SIZE, PLAYER_SIZE)
         self.hud = hud
+        self.show_debug_hitbox = False  # Alussa piilotettu
 
         # Pelaajan hattu
         hattu_path = os.path.join(project_dir, "media", "Img", "pelaaja.png")
@@ -190,8 +191,8 @@ class Player:
         screen.blit(ase_surface, ase_rect)
         screen.blit(rotated_hattu, hattu_rect)
 
-        # Debug-hyökkäysalue
-        if self.is_attacking:
+        # Debug-hyökkäysalue (piilotettavissa)
+        if self.is_attacking and self.show_debug_hitbox:
             debug_length = 100
             debug_width = 30
             direction = pygame.Vector2(math.cos(radians), math.sin(radians))
