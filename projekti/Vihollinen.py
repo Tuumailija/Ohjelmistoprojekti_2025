@@ -21,6 +21,10 @@ class Vihollinen:
         self.speed = 100
         self.angle = 0
 
+        self.health_state = 2
+        self.is_stunned = False
+        self.stun_end_time = 0
+
         self.light_intensity = 1.0  # 🔧 Alustetaan oletusarvo valaistukselle
 
         kuva_polku = os.path.join(project_dir, "media", "Img", "zombie.PNG")
@@ -39,6 +43,13 @@ class Vihollinen:
 
 
     def update(self, dt, player, matrix, game_map):
+        # Tarkistetaan onko vihollinen edelleen stunnissa
+        if self.is_stunned:
+            if pygame.time.get_ticks() >= self.stun_end_time:
+                self.is_stunned = False
+            else:
+                return  # Ei päivitetä liikettä tai törmäyksiä
+
         def get_room_id_from_pos(pos):
             x, y = pos
             col = x // (CELL_WIDTH * TILE_SIZE)
@@ -128,7 +139,6 @@ class Vihollinen:
                     #satuta pelaajaa jos iframet sallii
                     if not player.ishurting:
                         player.hurt(35)
-                        print("vihollinen osui pelaajaan [" + str(player.hp) + "]")
 
                         if self.vihujenaani is not None:
                             self.vihujenaani.play()
@@ -185,9 +195,22 @@ class Vihollinen:
                 target += light_value
         target *= 3
         target = min(target, 1.0)
-        target = max(target, 0.2)
+        target = max(target, 0)
 
         smoothing_speed = 0.1
         if not hasattr(self, "light_intensity"):
             self.light_intensity = 1.0
         self.light_intensity += (target - self.light_intensity) * smoothing_speed
+
+    def take_damage(self):
+        if self.is_stunned:
+            return
+
+        self.health_state -= 1
+        print(f"Vihollinen otti osuman! health_state = {self.health_state}")
+        self.is_stunned = True
+        self.stun_end_time = pygame.time.get_ticks() + 1000  # 1 sekunti
+
+        if self.health_state <= 0:
+            print("Vihollinen kuoli!")
+            self.health_state = 0  # Varmistetaan ettei mene negatiiviseksi

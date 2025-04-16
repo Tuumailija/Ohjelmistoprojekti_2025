@@ -190,7 +190,7 @@ class Kliittyma:
 
         # Lista vihollisille ja parametrit spawnausta ja despawnausta varten
         enemies = []
-        MAX_ENEMIES = 1
+        MAX_ENEMIES = 10
         SPAWN_INTERVAL = 3000         # Spawnataan uusi vihollinen x ms välein
         DESPAWN_DISTANCE = 1500       # Jos vihollinen on yli x pikselin päässä pelaajasta, se poistetaan
         spawn_timer = pygame.time.get_ticks()
@@ -229,9 +229,23 @@ class Kliittyma:
                     elif event.key == pygame.K_v:
                         hud.redden(player.hp)
                         player.hp += 10
-
+                        
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     player.attack()
+
+                    hitbox = player.get_attack_hitbox()
+                    if hitbox:
+                        attack_poly_rect = pygame.Rect(
+                            min(p.x for p in hitbox),
+                            min(p.y for p in hitbox),
+                            max(p.x for p in hitbox) - min(p.x for p in hitbox),
+                            max(p.y for p in hitbox) - min(p.y for p in hitbox)
+                        )
+
+                        for enemy in enemies:
+                            if attack_poly_rect.colliderect(enemy.rect):
+                                enemy.take_damage()
+
 
             # Hae esteet (seinät + ovet) pelaajaa ympäriltä
             doors_in_radius = [door.rect for door in game_map.doors 
@@ -241,6 +255,10 @@ class Kliittyma:
             # Päivitetään pelaaja ja liikutaan
             player.update(dt)
             player.move(pygame.key.get_pressed(), walls)
+
+            if player.hp <= 0:
+                self.nayta_havio_ruutu()
+                return
 
             # Kameran asetukset
             cam_x = max(-SCREEN_WIDTH // 2, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
@@ -309,6 +327,9 @@ class Kliittyma:
 
             # Tämä osa siirretään ulkopuolelle ja suoritetaan JOKA framella
             for enemy in enemies[:]:
+                if enemy.health_state == 0:
+                    enemies.remove(enemy)
+                    continue
                 if pygame.math.Vector2(enemy.rect.center).distance_to(player.rect.center) > DESPAWN_DISTANCE:
                     enemies.remove(enemy)
                 else:
@@ -373,3 +394,54 @@ class Kliittyma:
                     pygame.quit()
                     sys.exit()
         self.run() 
+
+    def nayta_havio_ruutu(self):
+        fontti_iso = pygame.font.SysFont("Impact", 120)
+        fontti_pieni = pygame.font.SysFont("Arial", 40)
+
+        teksti = "HÄVISIT"
+        alateksti = "Paina mitä tahansa näppäintä palataksesi valikkoon"
+
+        clock = pygame.time.Clock()
+        t = 0
+        fade = 0
+
+        while True:
+            self.screen.fill((0, 0, 0))
+
+            # Vilkkuva punainen häviöteksti
+            red_val = 150 + int(105 * math.sin(t / 10))
+            teksti_surface = fontti_iso.render(teksti, True, (red_val, 0, 0))
+            varjo_surface = fontti_iso.render(teksti, True, (0, 0, 0))
+
+            text_x = self.screen.get_width() // 2 - teksti_surface.get_width() // 2
+            text_y = self.screen.get_height() // 2 - teksti_surface.get_height() // 2
+
+            # Varjostus
+            for dx in [-3, 3]:
+                for dy in [-3, 3]:
+                    self.screen.blit(varjo_surface, (text_x + dx, text_y + dy))
+
+            # Pääteksti
+            self.screen.blit(teksti_surface, (text_x, text_y))
+
+            # Alateksti
+            fade = min(fade + 5, 255)
+            alateksti_surface = fontti_pieni.render(alateksti, True, (255, 255, 255))
+            alateksti_surface.set_alpha(fade)
+            self.screen.blit(
+                alateksti_surface,
+                (self.screen.get_width() // 2 - alateksti_surface.get_width() // 2, text_y + 200)
+            )
+
+            pygame.display.flip()
+            clock.tick(60)
+            t += 1
+
+            # Eventit
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    return
+                elif event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()

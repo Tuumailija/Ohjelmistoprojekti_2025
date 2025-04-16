@@ -203,3 +203,22 @@ class Player:
             debug_surface = pygame.Surface((screen.get_width(), screen.get_height()), pygame.SRCALPHA)
             pygame.draw.polygon(debug_surface, (255, 0, 0, 100), [p1, p2, p3, p4])
             screen.blit(debug_surface, (0, 0))
+
+    def get_attack_hitbox(self):
+        if not self.is_attacking:
+            return None
+
+        radians = math.radians(self.angle)
+        direction = pygame.Vector2(math.cos(radians), math.sin(radians))
+        perpendicular = pygame.Vector2(-direction.y, direction.x)
+
+        center = pygame.Vector2(self.rect.center)
+        debug_length = 100
+        debug_width = 30
+
+        p1 = center + direction * (PLAYER_SIZE / 2) + perpendicular * (debug_width / 2)
+        p2 = center + direction * (PLAYER_SIZE / 2) - perpendicular * (debug_width / 2)
+        p3 = p2 + direction * debug_length
+        p4 = p1 + direction * debug_length
+
+        return [p1, p2, p3, p4]  # Polygonin pisteet
