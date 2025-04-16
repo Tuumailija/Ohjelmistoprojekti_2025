@@ -190,7 +190,7 @@ class Kliittyma:
 
         # Lista vihollisille ja parametrit spawnausta ja despawnausta varten
         enemies = []
-        MAX_ENEMIES = 1
+        MAX_ENEMIES = 10
         SPAWN_INTERVAL = 3000         # Spawnataan uusi vihollinen x ms välein
         DESPAWN_DISTANCE = 1500       # Jos vihollinen on yli x pikselin päässä pelaajasta, se poistetaan
         spawn_timer = pygame.time.get_ticks()
