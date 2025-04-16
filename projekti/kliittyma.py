@@ -342,6 +342,27 @@ class Kliittyma:
                     enemy.set_lighting(lights, walls)
                     enemy.update(dt, player, matrix, game_map)
                     enemy.draw(self.screen, cam_x, cam_y, player.rect.center, angle, walls)
+            
+            # otetaan viimeisen huoneen ID ja pelaajan huoneen ID
+            last_room_id = max(r for row in matrix for r in row)
+            player_room_id = matrix[player.rect.centery // (CELL_HEIGHT * TILE_SIZE)][player.rect.centerx // (CELL_WIDTH * TILE_SIZE)]
+
+            if player_room_id == last_room_id:
+                # Lasketaan huoneen vaakarajat
+                cells = [(r, c) for r in range(len(matrix)) for c in range(len(matrix[0])) if matrix[r][c] == last_room_id]
+                min_c = min(c for r, c in cells)
+                max_c = max(c for r, c in cells)
+                room_left = (min_c * CELL_WIDTH + 1) * TILE_SIZE
+                room_right = (max_c * CELL_WIDTH + 1 + ROOM_WIDTH) * TILE_SIZE
+
+                # Lasketaan pelaajan etäisyys huoneen vasemmasta reunasta
+                relative_x = max(0, min(1, (player.rect.centerx - room_left) / (room_right - room_left)))
+                fade_alpha = int(relative_x * 255)
+
+                # Piirretään haalistuskerros
+                fade_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+                fade_surface.fill((200, 200, 200, fade_alpha)) # Vaaleanharmaa väri näytti paremmalta kuin valkoinen
+                self.screen.blit(fade_surface, (0, 0))
 
             # Piirretään HUD ja päivitetään näyttö
             hud.draw(self.current_time, player.hp)
