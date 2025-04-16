@@ -256,6 +256,10 @@ class Kliittyma:
             player.update(dt)
             player.move(pygame.key.get_pressed(), walls)
 
+            if player.hp <= 0:
+                self.nayta_havio_ruutu()
+                return
+
             # Kameran asetukset
             cam_x = max(-SCREEN_WIDTH // 2, min(player.rect.centerx - SCREEN_WIDTH // 2, game_map.map_width_px - SCREEN_WIDTH))
             cam_y = max(-SCREEN_HEIGHT // 2, min(player.rect.centery - SCREEN_HEIGHT // 2, game_map.map_height_px - SCREEN_HEIGHT))
@@ -369,3 +373,54 @@ class Kliittyma:
                     pygame.quit()
                     sys.exit()
         self.run() 
+
+    def nayta_havio_ruutu(self):
+        fontti_iso = pygame.font.SysFont("Impact", 120)
+        fontti_pieni = pygame.font.SysFont("Arial", 40)
+
+        teksti = "HÄVISIT"
+        alateksti = "Paina mitä tahansa näppäintä palataksesi valikkoon"
+
+        clock = pygame.time.Clock()
+        t = 0
+        fade = 0
+
+        while True:
+            self.screen.fill((0, 0, 0))
+
+            # Vilkkuva punainen häviöteksti
+            red_val = 150 + int(105 * math.sin(t / 10))
+            teksti_surface = fontti_iso.render(teksti, True, (red_val, 0, 0))
+            varjo_surface = fontti_iso.render(teksti, True, (0, 0, 0))
+
+            text_x = self.screen.get_width() // 2 - teksti_surface.get_width() // 2
+            text_y = self.screen.get_height() // 2 - teksti_surface.get_height() // 2
+
+            # Varjostus
+            for dx in [-3, 3]:
+                for dy in [-3, 3]:
+                    self.screen.blit(varjo_surface, (text_x + dx, text_y + dy))
+
+            # Pääteksti
+            self.screen.blit(teksti_surface, (text_x, text_y))
+
+            # Alateksti
+            fade = min(fade + 5, 255)
+            alateksti_surface = fontti_pieni.render(alateksti, True, (255, 255, 255))
+            alateksti_surface.set_alpha(fade)
+            self.screen.blit(
+                alateksti_surface,
+                (self.screen.get_width() // 2 - alateksti_surface.get_width() // 2, text_y + 200)
+            )
+
+            pygame.display.flip()
+            clock.tick(60)
+            t += 1
+
+            # Eventit
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    return
+                elif event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
