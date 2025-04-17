@@ -16,6 +16,11 @@ class Player:
         self.hud = hud
         self.show_debug_hitbox = False  # Alussa piilotettu
 
+        # player.py, Player.__init__-metodiin
+        self.max_hp = 100         # maksimielämäpisteet
+        self.regen_rate = 5       # HP:tä per second palautuu
+
+
         # Pelaajan hattu
         hattu_path = os.path.join(project_dir, "media", "Img", "pelaaja.png")
         if os.path.exists(hattu_path):
@@ -110,10 +115,17 @@ class Player:
                 self.move_sound.stop()
 
     def update(self, dt):
+        # jos hyökkäys/iframes on ohi, kytketään ishurt pois
         if self.is_attacking:
             self.attack_timer -= dt
             if self.attack_timer <= 0:
                 self.is_attacking = False
+
+        # HP-regeneration: kun ei olla iframessa ja HP alle maksimin
+        if not self.ishurting and self.hp < self.max_hp:
+            # dt on millisekunteja -> jaetaan 1000:lla
+            self.hp = min(self.hp + self.regen_rate * (dt / 1000.0), self.max_hp)
+
 
     def attack(self):
         self.is_attacking = True
