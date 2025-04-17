@@ -87,7 +87,7 @@ class Kliittyma:
         if os.path.exists(musiikki_polku):
             print(f"Ladataan musiikkia: {musiikki_polku}")
             pygame.mixer.music.load(musiikki_polku)
-            pygame.mixer.music.set_volume(0.4)
+            pygame.mixer.music.set_volume(0.3)
             pygame.mixer.music.play(-1)
             self.musiikki_soi = True
         else:
@@ -109,7 +109,7 @@ class Kliittyma:
         if os.path.exists(musiikki):
             print(f"Ladataan musiikkia: {musiikki}")
             pygame.mixer.music.load(musiikki)
-            pygame.mixer.music.set_volume(0.1)
+            pygame.mixer.music.set_volume(0.3)
             pygame.mixer.music.play()
         else:
             print(f"Taustamusiikkia ei löytynyt polusta: {musiikki}")
@@ -391,6 +391,18 @@ class Kliittyma:
         return angle
     
     def nayta_voitto_ruutu(self, debug=False):
+        # Soitetaan voitto musiikki
+        voitto_musiikki_polku = os.path.join(project_dir, "media", "VoittoFanfare.mp3")
+        if os.path.exists(voitto_musiikki_polku):
+            print(f"Ladataan voitto musiikkia: {voitto_musiikki_polku}")
+            voitto_musiikki = pygame.mixer.Sound(voitto_musiikki_polku)
+            voitto_musiikki.set_volume(0.4)
+            voitto_musiikki.play()
+        else:
+            print(f"Voitto musiikkia ei löytynyt polusta: {voitto_musiikki_polku}")
+
+
+
         fontti = pygame.font.SysFont("Arial", 80)
         teksti = "VOITIT PELIN!"
         alateksti = "Paina mitä tahansa näppäintä palataksesi valikkoon"
