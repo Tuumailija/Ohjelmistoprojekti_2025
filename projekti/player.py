@@ -4,7 +4,6 @@ import math
 import sys
 from raycast import Ray
 
-
 PLAYER_SIZE = 32
 PLAYER_SPEED = 5
 
@@ -19,7 +18,6 @@ class Player:
         # player.py, Player.__init__-metodiin
         self.max_hp = 100         # maksimielämäpisteet
         self.regen_rate = 5       # HP:tä per second palautuu
-
 
         # Pelaajan hattu
         hattu_path = os.path.join(project_dir, "media", "Img", "pelaaja.png")
@@ -42,7 +40,6 @@ class Player:
             print(f"Virhe: Asekuvaa ei löytynyt polusta: {ase_path}")
             self.ase_image = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE), pygame.SRCALPHA)
             pygame.draw.rect(self.ase_image, (255, 0, 0), self.ase_image.get_rect())
-
         
         # Ladataan hyökkäysääni
         aanen_polku = os.path.join(project_dir, "media", "miekka_ääni.mp3")
@@ -51,7 +48,6 @@ class Player:
         else:
             print(f"Virhe: Hyökkäysääntä ei löytynyt polusta: {aanen_polku}")
             self.attack_sound = None
-
 
         # Pelaajan liikkumis ääni
         liikkumis_aanen_polku = os.path.join(project_dir, "media", "Kavelypuulla.mp3")
@@ -62,7 +58,6 @@ class Player:
             print(f"Virhe: Liikkumisääntä ei löytynyt polusta: {liikkumis_aanen_polku}")
             self.move_sound = None
         
-
         self.hp = 100
         self.iframes = 600
         self.stop_hurting = 0 #kellonaika+iftames varmaan huono tapa :(
@@ -91,7 +86,6 @@ class Player:
         # Smooth transition: lineaarinen interpolaatio vanhasta uuteen
         smoothing_speed = 0.1  # isompi arvo = nopeampi reagointi
         self.light_intensity += (target - self.light_intensity) * smoothing_speed
-
 
     def move(self, keys, walls):
         dx = dy = 0
@@ -126,7 +120,6 @@ class Player:
             # dt on millisekunteja -> jaetaan 1000:lla
             self.hp = min(self.hp + self.regen_rate * (dt / 1000.0), self.max_hp)
 
-
     def attack(self):
         self.is_attacking = True
         self.attack_timer = self.attack_duration
@@ -142,13 +135,7 @@ class Player:
             self.ishurting = True
             self.stop_hurting = pygame.time.get_ticks() + self.iframes
 
-
     def draw(self, screen, cam_x, cam_y, angle):
-        #no vaikka tapan sen.
-        if self.hp < 1:
-            print("pelaaja kuoli")
-
-
         if pygame.time.get_ticks() > self.stop_hurting:
             self.ishurting = False
 
