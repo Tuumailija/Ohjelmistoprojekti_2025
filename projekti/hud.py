@@ -13,6 +13,11 @@ class gamehud:
         else:
             print(f"Kuvan polku on väärin: {self.path_redden}")
 
+        self.path_splatter = os.path.join(project_dir, "media", "Img", "hud_splatter.png")
+        if os.path.exists(self.path_splatter):
+            print(f"Kuvan polku on oikein {self.path_splatter}")
+        else:
+            print(f"Kuvan polku on väärin: {self.path_splatter}")
 
         self.screen = screen
         self.sw = SCREEN_WIDTH
@@ -24,6 +29,9 @@ class gamehud:
 
         #veriläiskä taso
         self.player_splatter_layer = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
+        #veriläiskän kuva
+        self.splatterimg = pygame.image.load(self.path_splatter).convert_alpha()
+        self.splatterimg = pygame.transform.scale(self.splatterimg, (self.splatterimg.get_width()/2, self.splatterimg.get_height()/2))
         #aika jolloin splatteri poistetaan (current_time+2000)
         self.pyyhipois = 0
 
@@ -36,15 +44,13 @@ class gamehud:
 
     def splatter(self, current_time):
         self.pyyhipois = current_time+2000
-        borderwidth = 0
 
-        for _ in range(5):
+        for _ in range(20):
             #satunnainen x,y ruudulla
             x = random.randint(0, self.sw - 1)
             y = random.randint(0, self.sh - 1)
 
-            #luo 50x50 punainen loota
-            pygame.draw.rect(self.player_splatter_layer, (255, 0, 0), (x, y, 50, 50), borderwidth)
+            self.player_splatter_layer.blit(self.splatterimg, (x, y))
 
     def redden(self, hp):
         # piirrä hudiin punainen reunusta
@@ -71,7 +77,7 @@ class gamehud:
         
         self.screen.blit(self.player_hp_layer, (0, 0))
         
-        #laske 2 sekuntia, sitten laita self.show_verilaiska = False
+        #piirrä veriläiskätaso
         if current_time > self.pyyhipois:
             self.player_splatter_layer = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
         else:
