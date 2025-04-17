@@ -43,13 +43,14 @@ class Vihollinen:
 
 
     def update(self, dt, player, matrix, game_map):
-        # Tarkistetaan onko vihollinen edelleen stunnissa
+        # Jos vielä stunnissa, odota
         if self.is_stunned:
             if pygame.time.get_ticks() >= self.stun_end_time:
                 self.is_stunned = False
             else:
-                return  # Ei päivitetä liikettä tai törmäyksiä
+                return
 
+        # Apufunktio huone-ID:n hakemiseen
         def get_room_id_from_pos(pos):
             x, y = pos
             col = x // (CELL_WIDTH * TILE_SIZE)
@@ -61,88 +62,72 @@ class Vihollinen:
         enemy_room_id = get_room_id_from_pos(self.rect.center)
         player_room_id = get_room_id_from_pos(player.rect.center)
 
-        if enemy_room_id == player_room_id or any(self.rect.colliderect(door.rect) for door in game_map.doors):
+        # Määritä tavoite: suoraan pelaajaan, jos samassa huoneessa tai ovella
+        if (enemy_room_id == player_room_id
+                or any(self.rect.colliderect(door.rect) for door in game_map.doors)):
             target = pygame.math.Vector2(player.rect.center)
         else:
             path = game_map.find_path_between_rooms(enemy_room_id, player_room_id)
             if len(path) >= 2:
-                next_room_id = path[1]
+                next_room = path[1]
 
-                def door_connects(door, room_a, room_b):
+                def door_connects(door, a, b):
                     door_room = get_room_id_from_pos(door.rect.center)
-                    for dx in [-1, 1, 0, 0]:
-                        for dy in [-1, 1, 0, 0]:
-                            neighbor_pos = (door.rect.centerx + dx * TILE_SIZE, door.rect.centery + dy * TILE_SIZE)
-                            neighbor_room = get_room_id_from_pos(neighbor_pos)
-                            if {door_room, neighbor_room} == {room_a, room_b}:
-                                return True
+                    for dx, dy in [(-1,0),(1,0),(0,-1),(0,1)]:
+                        neigh = (door.rect.centerx + dx * TILE_SIZE,
+                                 door.rect.centery + dy * TILE_SIZE)
+                        if {door_room, get_room_id_from_pos(neigh)} == {a, b}:
+                            return True
                     return False
 
-                possible_doors = [
-                    door for door in game_map.doors
-                    if door_connects(door, enemy_room_id, next_room_id)
+                doors_between = [
+                    d for d in game_map.doors
+                    if door_connects(d, enemy_room_id, next_room)
                 ]
-
-                if possible_doors:
-                    best_door = min(
-                        possible_doors,
-                        key=lambda d: pygame.math.Vector2(d.rect.center).distance_to(self.rect.center)
-                    )
-                    target = pygame.math.Vector2(best_door.rect.center)
+                if doors_between:
+                    best = min(doors_between,
+                               key=lambda d: pygame.Vector2(d.rect.center).distance_to(self.rect.center))
+                    target = pygame.math.Vector2(best.rect.center)
                 else:
                     target = pygame.math.Vector2(player.rect.center)
             else:
                 target = pygame.math.Vector2(player.rect.center)
 
-        # Liikkuminen ja suunta päivittyy samalla
-        enemy_center = pygame.math.Vector2(self.rect.center)
-        direction = target - enemy_center
+        # Laske liike ja kulma
+        center = pygame.math.Vector2(self.rect.center)
+        direction = target - center
         if direction.length() != 0:
-            # Korjaa kulmaa: tässä oletetaan, että alkuperäinen sprite katsoo ylös.
-            # Jos sprite katsoo eri suuntaan, säädä kulmakorjausta (tässä -90 astetta).
             self.angle = math.degrees(math.atan2(-direction.y, direction.x)) - 90
             direction = direction.normalize()
         movement = direction * self.speed * (dt / 1000.0)
 
-        # Haetaan törmäysesteet: huoneen seinät ja pelaaja.
+        # Kerää törmäysesteet (seinät + pelaaja)
         walls = game_map.get_walls_in_radius(self.rect.centerx, self.rect.centery, 200)
         walls.append(player.rect)
 
-        # Liikutetaan vihollista ensin kokonaisliikkeellä
+        # Siirry
         self.rect.x += movement.x
         self.rect.y += movement.y
 
-        # Tarkistetaan törmäykset ja korjataan ne "nudgeamalla" ulos
+        # Ratkaise törmäykset
         for wall in walls:
             if self.rect.colliderect(wall):
-                # Lasketaan päällekkäisyys
                 overlap = self.rect.clip(wall)
-                if overlap.width == 0 or overlap.height == 0:
-                    continue  # Ei päällekkäisyyttä
+                if overlap.width and overlap.height:
+                    if overlap.width < overlap.height:
+                        self.rect.x += -overlap.width if self.rect.centerx < wall.centerx else overlap.width
+                    else:
+                        self.rect.y += -overlap.height if self.rect.centery < wall.centery else overlap.height
+                if wall is player.rect and not player.ishurting:
+                    player.hurt(35)
+                    if self.vihujenaani:
+                        self.vihujenaani.play()
 
-                # Korjataan pienimmän korjaussuunta-arvon mukaisesti
-                if overlap.width < overlap.height:
-                    # Pienempi korjaus vaakasuunnassa
-                    if self.rect.centerx < wall.centerx:
-                        self.rect.x -= overlap.width
-                    else:
-                        self.rect.x += overlap.width
-                else:
-                    # Pienempi korjaus pystysuunnassa
-                    if self.rect.centery < wall.centery:
-                        self.rect.y -= overlap.height
-                    else:
-                        self.rect.y += overlap.height
+        # Avaa ovet, jos niihin törmätään
+        for door in game_map.doors:
+            if not door.is_open and self.rect.colliderect(door.rect):
+                door.toggle(self.angle)
                 
-                #jos törmätty kohde on pelaaja
-                if wall == player.rect:
-                    #satuta pelaajaa jos iframet sallii
-                    if not player.ishurting:
-                        player.hurt(35)
-
-                        if self.vihujenaani is not None:
-                            self.vihujenaani.play()
-
     def draw(self, surface, cam_x, cam_y, player_pos, player_angle, obstacles=None):
         player_angle *= -1
         visionField = fieldOfVisionDegrees - 35
