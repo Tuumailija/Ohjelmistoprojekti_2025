@@ -229,14 +229,6 @@ class Kliittyma:
                             print("DEBUG: painettu E debug-arkulla!")
                             self.nayta_voitto_ruutu(debug=True)
                             return
-                    
-                    # Debug-toimintoja
-                    elif event.key == pygame.K_c:
-                        hud.redden(player.hp)
-                        player.hp -= 10
-                    elif event.key == pygame.K_v:
-                        hud.redden(player.hp)
-                        player.hp += 10
                         
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     player.attack()
@@ -253,7 +245,6 @@ class Kliittyma:
                         for enemy in enemies:
                             if attack_poly_rect.colliderect(enemy.rect):
                                 enemy.take_damage()
-
 
             # Hae esteet (seinät + ovet) pelaajaa ympäriltä
             doors_in_radius = [door.rect for door in game_map.doors 

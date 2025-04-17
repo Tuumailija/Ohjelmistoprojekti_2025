@@ -22,11 +22,7 @@ class gamehud:
         self.screen = screen
         self.sw = SCREEN_WIDTH
         self.sh = SCREEN_HEIGHT
-
-        #perus hud-elementtäejä taso
-        #tähän piirretään pelaajan hp sun muita mitä nyt hudiin tahdotaan.
-        #self.general_hud = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
-
+        
         #veriläiskä taso
         self.player_splatter_layer = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
         #veriläiskän kuva
@@ -37,10 +33,6 @@ class gamehud:
 
         #punaisen reunustan taso
         self.player_hp_layer = pygame.Surface((self.sw, self.sh), pygame.SRCALPHA)
-        self.redborder = pygame.image.load(self.path_redden).convert_alpha()
-        self.redborder.set_alpha(0)
-        self.redborder_rect = self.redborder.get_rect()
-        self.lastdrawnhp = 40693
 
     def splatter(self, current_time):
         self.pyyhipois = current_time+2000
