@@ -207,10 +207,8 @@ class Vihollinen:
             return
 
         self.health_state -= 1
-        print(f"Vihollinen otti osuman! health_state = {self.health_state}")
         self.is_stunned = True
         self.stun_end_time = pygame.time.get_ticks() + 1000  # 1 sekunti
 
         if self.health_state <= 0:
-            print("Vihollinen kuoli!")
             self.health_state = 0  # Varmistetaan ettei mene negatiiviseksi
