@@ -15,6 +15,8 @@ class Vihollinen:
         # Pixelöi sprite
         self.original_sprite = self.pixelate(original, pixel_size)
         self.rect = self.original_sprite.get_rect(center=(x, y))
+        self.rect.inflate_ip(-size * 0.4, -size * 0.4)  # pienempi hitbox
+
 
         self.speed = 100
         self.angle = 0

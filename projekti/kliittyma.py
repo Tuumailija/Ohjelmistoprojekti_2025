@@ -283,7 +283,9 @@ class Kliittyma:
                 self.screen.blit(light_mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
             # Päivitetään esteet säteiden laskentaa varten
-            self.ray_caster.set_obstacles(walls)
+            enemy_rects = [enemy.rect for enemy in enemies]
+            self.ray_caster.set_obstacles(walls + enemy_rects)
+
             for wall in walls:
                 pygame.draw.rect(self.screen, (0, 0, 0), 
                                 pygame.Rect(wall.x - cam_x, wall.y - cam_y, wall.width, wall.height))
