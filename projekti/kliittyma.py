@@ -120,40 +120,76 @@ class Kliittyma:
         self.piirra_valikko()
 
     def piirra_valikko(self):
-        optio_lista = ["Aloita peli", "Ohjeet", "Lopeta"]
-        iso_fontti = pygame.font.SysFont("Old English Text MT", 70)
+        # Lataa ja skaalaa taustakuva kerran
+        bg = pygame.transform.scale(self.menu_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        # Fontit
+        font_iso = pygame.font.SysFont("Old English Text MT", 70)
+        font_var = pygame.font.SysFont("Old English Text MT", 70)
+        # Värit idle / hover
+        idle_color, hover_color = (200, 200, 200), (255, 50, 50)
+        # Nappien tekstit
+        options = ["Aloita peli", "Ohjeet", "Lopeta"]
+        # Luo napit: (teksti, pinta, rect)
+        buttons = []
+        for i, text in enumerate(options):
+            surf = font_iso.render(text, True, idle_color)
+            rect = surf.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 100 + i*120))
+            buttons.append([text, surf, rect])
+
+        # Animaatiomuuttujat
+        bg_offset = 0
+        fade_alpha = 255
+
+        clock = pygame.time.Clock()
         while True:
-            # Taustakuva
-            valikko_tausta = pygame.transform.scale(self.menu_background, (SCREEN_WIDTH, SCREEN_HEIGHT))
-            self.screen.blit(valikko_tausta, (0, 0))
+            dt = clock.tick(60)
+            # Liikuta taustaa vaakasuunnassa
+            bg_offset = (bg_offset + dt * 0.02) % SCREEN_WIDTH
+            # Piirrä liukuva tausta (tiled)
+            self.screen.blit(bg, (-bg_offset, 0))
+            self.screen.blit(bg, (SCREEN_WIDTH - bg_offset, 0))
+
+            # Fade‑in musta päälle
+            if fade_alpha > 0:
+                fade_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+                fade_surface.fill((0, 0, 0))
+                fade_surface.set_alpha(fade_alpha)
+                self.screen.blit(fade_surface, (0, 0))
+                fade_alpha = max(fade_alpha - 5, 0)
 
             mouse_pos = pygame.mouse.get_pos()
-            valittu_optio = -1
-            keski_x = self.screen.get_width() // 2
-            keski_y = self.screen.get_height() // 2 - (len(optio_lista) * 50 // 2)
+            valittu = -1
 
-            for i, optio in enumerate(optio_lista):
-                teksti = iso_fontti.render(optio, True, (0, 0, 0))
-                teksti_rect = teksti.get_rect(center=(keski_x, keski_y + i * 100))
-                if teksti_rect.collidepoint(mouse_pos):
-                    teksti = iso_fontti.render(optio, True, (255, 0, 0))
-                    valittu_optio = i
-                self.screen.blit(teksti, teksti_rect)
+            # Piirrä napit hover‑efektillä
+            for i, (text, surf, rect) in enumerate(buttons):
+                hover = rect.collidepoint(mouse_pos)
+                color = hover_color if hover else idle_color
+                # Rendataan uusi pinta vain jos väri muuttuu
+                surf = font_iso.render(text, True, color)
+                surf_rect = surf.get_rect(center=rect.center)
+                self.screen.blit(surf, surf_rect)
+                buttons[i][1], buttons[i][2] = surf, surf_rect
+                if hover:
+                    valittu = i
 
             pygame.display.flip()
-            
+
+            # Tapahtumakäsittely
             for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if valittu_optio == 0:
-                        self.kaynnista_peli()
-                    elif valittu_optio == 1:
-                        self.piirra_ohjeet()
-                    elif valittu_optio == 2:
-                        pygame.quit()
-                        sys.exit()
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if valittu == 0:
+                        self.kaynnista_peli()
+                    elif valittu == 1:
+                        self.piirra_ohjeet()
+                    elif valittu == 2:
+                        pygame.quit()
+                        sys.exit()
 
     def piirra_ohjeet(self):
         self.screen.fill((0, 0, 0))
