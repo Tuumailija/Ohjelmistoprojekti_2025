@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('media\\Img', 'media\\Img'), ('media\\Aloitusmusiikki.mp3', 'media'), ('media\\Kayvelypuulla.mp3', 'media'), ('media\\Taustamusiikki.mp3', 'media'), ('media\\Taustamusiikki2.mp3', 'media'), ('media\\Taustamusiikki3.mp3', 'media'), ('media\\Taustamusiikki4.mp3', 'media')],
+    datas=[('media', 'media')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
